@@ -1,5 +1,16 @@
 # Fleet orchestrator configuration
 # Save to .specify/extensions/fleet/fleet-config.yml
+#
+# Local overrides (gitignored, never commit model choices or personal prefs):
+#   .specify/extensions/fleet/fleet-config.local.yml
+# Add to .gitignore: .specify/extensions/fleet/fleet-config.local.yml
+#
+# Config precedence (highest wins):
+#   CLI flags (--skip-clarify etc.)
+#   > Environment vars (FLEET_MODEL_REVIEW, FLEET_SKIP_CLARIFY etc.)
+#   > fleet-config.local.yml
+#   > fleet-config.yml (this file)
+#   > extension defaults (extension.yml)
 
 fleet:
   models:
@@ -11,20 +22,38 @@ fleet:
     review: "ask"
 
   phases:
-    # Skip Phase 2 (Clarify) automatically
+    # Skip Phase 2 (Clarify) automatically — or pass --skip-clarify at runtime
     skip_clarify: false
 
-    # Skip Phase 4 (Checklist) automatically
+    # Skip Phase 4 (Checklist) automatically — or pass --skip-checklist at runtime
     skip_checklist: false
 
-    # Skip Phase 7 (Cross-model review) automatically
+    # Skip Phase 7 (Cross-model review) automatically — or pass --skip-review at runtime
     skip_review: false
 
-    # Skip Phase 9 (Verify) if the verify extension is not installed
-    skip_verify_if_missing: true
+    # Skip Phase 9 (Code Review) automatically — or pass --skip-code-review at runtime
+    skip_code_review: false
+
+    # Skip Phase 10 (Verify) automatically — or pass --skip-verify at runtime
+    skip_verify: false
+
+    # Skip Phase 11 (Release Readiness) automatically — or pass --skip-release at runtime
+    skip_release: false
+
+  qa:
+    # When to run the 4-agent code review batch
+    #   per_phase: immediately after Phase 8 (Implement) — default
+    #   batch_end: run once at the end of all implementation batches
+    cadence: "per_phase"
+
+    # Toggle individual code review dimensions (Phase 9)
+    security: true       # OWASP Top 10 scoped to plan.md surfaces
+    code_quality: true   # Naming, complexity, duplication, error handling
+    patterns: true       # SOLID, codebase conventions from Phase 6 Analyze
+    tests: true          # Coverage gaps vs tasks.md acceptance criteria
 
   git:
-    # Offer a WIP commit after Phase 5 (Tasks), 8 (Implement), 9 (Verify)
+    # Offer a WIP commit after Phase 5 (Tasks), 8 (Implement), 10 (Verify)
     checkpoint_after_tasks: true
     checkpoint_after_implement: true
     checkpoint_after_verify: true
@@ -40,5 +69,5 @@ fleet:
     suggest_fresh_chat_at_phase: 5
 
   parallelism:
-    # Maximum number of concurrent subagents during Plan and Implement phases
+    # Maximum number of concurrent subagents during Plan, Implement, and Code Review phases
     max_concurrent: 3

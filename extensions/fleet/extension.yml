@@ -3,8 +3,8 @@ schema_version: "1.0"
 extension:
   id: "fleet"
   name: "Fleet Orchestrator"
-  version: "1.0.0"
-  description: "Full-lifecycle feature orchestrator that drives spec -> clarify -> plan -> checklist -> tasks -> analyze -> cross-model review -> implement -> verify -> CI with human-in-the-loop gates at every phase. Detects partially complete features and resumes from the right phase. Ships two agents: fleet.run (orchestrator) and fleet.review (cross-model reviewer)."
+  version: "1.1.0"
+  description: "Full-lifecycle feature orchestrator: 12-phase workflow (specify → clarify → plan → checklist → tasks → analyze → review → implement → code-review → verify → release-readiness → CI) with human-in-the-loop gates, parallel code-review agents, circuit breaker, progress.md session log, and machine-readable .fleet-status.yml tracker. Includes sync-verify and change-request cross-cutting commands."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
   license: "MIT"
@@ -39,6 +39,16 @@ provides:
       description: "Copies fleet .agent.md files to .github/agents/ for VS Code Copilot users."
       user-invocable: true
 
+    - name: "speckit.fleet.sync"
+      file: "commands/fleet-sync.md"
+      description: "Cross-cutting artifact drift detector. Run at any point in the lifecycle to check that all generated artifacts are consistent with each other across 7 consistency layers."
+      user-invocable: true
+
+    - name: "speckit.fleet.change-request"
+      file: "commands/fleet-change-request.md"
+      description: "Formal scope change management. Assigns CR-NNN identifiers, performs impact analysis across all artifacts, and updates affected files with CR markers."
+      user-invocable: true
+
   config:
     - name: "fleet-config.yml"
       template: "config-template.yml"
@@ -68,7 +78,15 @@ defaults:
       skip_clarify: false
       skip_checklist: false
       skip_review: false
-      skip_verify_if_missing: true
+      skip_code_review: false
+      skip_verify: false
+      skip_release: false
+    qa:
+      cadence: "per_phase"      # per_phase | batch_end
+      security: true
+      code_quality: true
+      patterns: true
+      tests: true
     git:
       checkpoint_after_tasks: true
       checkpoint_after_implement: true
