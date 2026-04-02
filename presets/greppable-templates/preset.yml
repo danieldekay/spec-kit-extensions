@@ -1,0 +1,73 @@
+schema_version: "1.0"
+
+preset:
+  id: "greppable-templates"
+  name: "Greppable Templates"
+  version: "1.0.0"
+  description: "Replaces core spec/tasks/checklist templates with greppable versions. Each artifact item carries a structured line-start prefix (FR-NNN, SC-NNN, TASK-TNNN, CHK-NNN) so shell scripts can query content by type. Ships sk-query.sh for FRs, SCs, tasks, open/done filtering, user-story scoping, and completion stats. Also provides a shared findings template (FINDING-NNN) used by code-quality and ux-research extensions."
+  author: "danieldekay"
+  repository: "https://github.com/danieldekay/spec-kit-extensions"
+  license: "MIT"
+  homepage: "https://github.com/danieldekay/spec-kit-extensions/tree/main/presets/greppable-templates"
+
+requires:
+  speckit_version: ">=0.2.0"
+
+provides:
+  templates:
+    - type: "template"
+      name: "spec-template"
+      file: "templates/spec-template.md"
+      description: "Greppable spec template — FR-NNN: and SC-NNN: prefixes at line start"
+      replaces: "spec-template"
+
+    - type: "template"
+      name: "tasks-template"
+      file: "templates/tasks-template.md"
+      description: "Greppable tasks template — TASK-TNNN: [ ] prefix at line start; preserves [P] and [USN] inline markers"
+      replaces: "tasks-template"
+
+    - type: "template"
+      name: "checklist-template"
+      file: "templates/checklist-template.md"
+      description: "Greppable checklist template — CHK-NNN: [ ] prefix at line start"
+      replaces: "checklist-template"
+
+    - type: "template"
+      name: "findings-template"
+      file: "templates/findings-template.md"
+      description: "Shared findings template — FINDING-NNN: severity|category|location|description; used by code-quality and ux-research extensions"
+
+    - type: "command"
+      name: "speckit.greppable-templates.install"
+      file: "commands/templates-install.md"
+      description: "Copies sk-query scripts to .specify/scripts/ after preset is activated"
+      replaces: "speckit.greppable-templates.install"
+
+# Bundled query scripts (not yet supported as type: "script" — installed via the
+# speckit.greppable-templates.install command or manually from scripts/)
+#
+#   sh:  scripts/sk-query.sh   → install to .specify/scripts/sk-query.sh
+#   ps:  scripts/sk-query.ps1  → install to .specify/scripts/sk-query.ps1
+#
+# Manual install:
+#   mkdir -p .specify/scripts
+#   cp <preset-path>/scripts/sk-query.sh .specify/scripts/ && chmod +x .specify/scripts/sk-query.sh
+#   cp <preset-path>/scripts/sk-query.ps1 .specify/scripts/
+
+tags:
+  - "templates"
+  - "grep"
+  - "shell"
+  - "tooling"
+  - "spec"
+  - "tasks"
+  - "findings"
+
+# Marker reference:
+#
+#   FR-NNN:      spec.md        sk-query.sh fr spec.md
+#   SC-NNN:      spec.md        sk-query.sh sc spec.md
+#   TASK-TNNN:   tasks.md       sk-query.sh task|open|done|stats|story tasks.md
+#   CHK-NNN:     checklist.md   sk-query.sh chk|open-chk|done-chk <file>
+#   FINDING-NNN: *-review.md    sk-query.sh findings|critical|high <file>

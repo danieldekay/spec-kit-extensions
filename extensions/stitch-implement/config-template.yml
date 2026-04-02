@@ -1,0 +1,26 @@
+# Stitch MCP integration configuration
+
+stitch:
+  # Mode: "prototype" | "validate" | "both"
+  #   prototype — generate screens before implementation
+  #   validate  — check implementation against designs
+  #   both      — full cycle (generate → implement → validate)
+  mode: "both"
+
+  # Automatically extract HTML/CSS from generated screens
+  auto_extract_code: true
+
+  # Number of design variants to generate per screen
+  variant_count: 2
+
+  # Default resolution for screen generation
+  resolution: "1024x768"
+
+  # Stitch project naming convention
+  project_prefix: "speckit"
+
+  # Where to save extracted design artifacts
+  output_directory: "design-artifacts"
+
+  # Skip validation for non-UI tasks
+  skip_backend_tasks: true

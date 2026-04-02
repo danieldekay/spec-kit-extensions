@@ -1,0 +1,69 @@
+schema_version: "1.0"
+
+extension:
+  id: "stitch-implement"
+  name: "Stitch Implementation Assistant"
+  version: "1.0.0"
+  description: "Adds a Stitch MCP sub-agent to the implementation phase for UI prototyping, pattern validation, and code extraction."
+  author: "danieldekay"
+  repository: "https://github.com/danieldekay/spec-kit-extensions"
+  license: "MIT"
+  homepage: "https://github.com/danieldekay/spec-kit-extensions/tree/main/extensions/stitch-implement"
+
+requires:
+  speckit_version: ">=0.2.0"
+  tools:
+    - name: "stitch"
+      version: ">=1.0.0"
+      required: true
+      url: "https://stitch.withgoogle.com"
+  commands:
+    - "speckit.implement"
+
+provides:
+  commands:
+    - name: "speckit.stitch-implement.prototype"
+      file: "commands/stitch-prototype.md"
+      description: "Generate or validate UI screens via Stitch MCP during implementation"
+      aliases: ["speckit.stitch-implement.ui"]
+      user-invocable: true
+
+    - name: "speckit.stitch-implement.validate"
+      file: "commands/stitch-validate.md"
+      description: "Validate implemented UI against Stitch prototypes and design tokens"
+      user-invocable: true
+
+  config:
+    - name: "stitch-implement-config.yml"
+      template: "config-template.yml"
+      description: "Stitch MCP integration configuration"
+      required: false
+
+hooks:
+  before_implement:
+    command: "speckit.stitch-implement.prototype"
+    optional: true
+    prompt: "Generate UI prototypes via Stitch before implementation?"
+    description: "Creates screen prototypes and extracts component patterns for UI-related tasks"
+    condition: null
+
+  after_implement:
+    command: "speckit.stitch-implement.validate"
+    optional: true
+    prompt: "Validate implemented UI against Stitch prototypes?"
+    description: "Compares implementation output against Stitch screen designs for visual consistency"
+    condition: null
+
+tags:
+  - "stitch"
+  - "ui"
+  - "implementation"
+  - "prototyping"
+  - "mcp"
+
+defaults:
+  stitch:
+    mode: "both"
+    auto_extract_code: true
+    variant_count: 2
+    resolution: "1024x768"

@@ -1,0 +1,55 @@
+# Code quality pipeline configuration
+
+code_quality:
+  review:
+    # What to check for
+    include_refactoring: true
+    include_tech_debt: true
+    include_dead_code: true
+    include_code_smells: true
+
+    # Minimum severity to report: "low" | "medium" | "high" | "critical"
+    severity_threshold: "medium"
+
+    # Principles to check against
+    principles:
+      - "SOLID"
+      - "DRY"
+      - "YAGNI"
+      - "KISS"
+
+  fix:
+    # Auto-fix minor issues without confirmation
+    auto_fix_minor: true
+
+    # Require confirmation for major fixes
+    auto_fix_major: false
+
+    # Maximum fix-recheck cycles
+    max_fix_cycles: 3
+
+  validate:
+    # Check functional requirements implementation
+    check_fr: true
+
+    # Check non-functional requirements implementation
+    check_nfr: true
+
+    # Verify testability of each requirement
+    check_testability: true
+
+    # Check documentation coverage
+    check_documentation: true
+
+  future:
+    # Improvement horizons: "short" | "medium" | "long" (comma-separated)
+    horizon: "short,medium,long"
+
+    # Include performance improvement ideas
+    include_performance: true
+
+    # Include scalability improvement ideas
+    include_scalability: true
+
+    # Include DX (developer experience) improvement ideas
+    include_dx: true

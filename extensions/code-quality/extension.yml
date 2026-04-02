@@ -1,0 +1,89 @@
+schema_version: "1.0"
+
+extension:
+  id: "code-quality"
+  name: "Code Quality Pipeline"
+  version: "1.0.0"
+  description: "Post-implementation code quality pipeline: review, fix, future ideas, and FR/NFR validation with testability and documentation checks."
+  author: "danieldekay"
+  repository: "https://github.com/danieldekay/spec-kit-extensions"
+  license: "MIT"
+  homepage: "https://github.com/danieldekay/spec-kit-extensions/tree/main/extensions/code-quality"
+
+requires:
+  speckit_version: ">=0.2.0"
+  commands:
+    - "speckit.implement"
+
+provides:
+  commands:
+    - name: "speckit.code-quality.review"
+      file: "commands/code-review.md"
+      description: "Code review: identify refactoring opportunities, tech debt, dead code, and code smells"
+      aliases: ["speckit.code-quality.cr"]
+      user-invocable: true
+
+    - name: "speckit.code-quality.fix"
+      file: "commands/code-fix.md"
+      description: "Auto-fix issues identified in the code review report"
+      aliases: ["speckit.code-quality.cf"]
+
+    - name: "speckit.code-quality.future"
+      file: "commands/future-ideas.md"
+      description: "Generate ideas for improving and extending the feature"
+      aliases: ["speckit.code-quality.fi"]
+
+    - name: "speckit.code-quality.validate"
+      file: "commands/validate-requirements.md"
+      description: "Validate FR/NFR implementation, testability, and documentation coverage"
+      aliases: ["speckit.code-quality.vr"]
+
+    - name: "speckit.code-quality.pipeline"
+      file: "commands/quality-pipeline.md"
+      description: "Run the full quality pipeline: review → fix → validate → future ideas"
+      aliases: ["speckit.code-quality.all"]
+      user-invocable: true
+
+  config:
+    - name: "code-quality-config.yml"
+      template: "config-template.yml"
+      description: "Code quality pipeline configuration"
+      required: false
+
+hooks:
+  after_implement:
+    command: "speckit.code-quality.pipeline"
+    optional: true
+    prompt: "Run the full code quality pipeline (review → fix → validate → future ideas)?"
+    description: "Comprehensive post-implementation quality check: reviews code, fixes issues, validates requirements, and generates improvement ideas"
+    condition: null
+
+tags:
+  - "code-review"
+  - "refactoring"
+  - "quality"
+  - "validation"
+  - "tech-debt"
+  - "dead-code"
+
+defaults:
+  code_quality:
+    review:
+      include_refactoring: true
+      include_tech_debt: true
+      include_dead_code: true
+      include_code_smells: true
+      severity_threshold: "medium"
+    fix:
+      auto_fix_minor: true
+      auto_fix_major: false
+      max_fix_cycles: 3
+    validate:
+      check_fr: true
+      check_nfr: true
+      check_testability: true
+      check_documentation: true
+    future:
+      horizon: "short,medium,long"
+      include_performance: true
+      include_scalability: true

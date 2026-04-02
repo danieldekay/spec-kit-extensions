@@ -1,0 +1,30 @@
+# UX research configuration
+# Override defaults per-project
+
+ux_research:
+  # Depth of codebase scan: "full" | "shallow" | "targeted"
+  scan_depth: "full"
+
+  # Include component library audit (shadcn, custom components)
+  include_component_audit: true
+
+  # Include interaction flow mapping
+  include_interaction_flows: true
+
+  # Output format: "markdown" | "json"
+  output_format: "markdown"
+
+  # Directories to scan for existing UI patterns (relative to repo root)
+  pattern_directories:
+    - "src/components"
+    - "src/views"
+    - "src/pages"
+    - "src/layouts"
+    - "src/ui"
+
+  # Tech stack hints (auto-detected if empty)
+  tech_stack: []
+
+  # Component registries to check (shadcn, radix, etc.)
+  component_registries:
+    - "shadcn"

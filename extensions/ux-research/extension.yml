@@ -1,0 +1,52 @@
+schema_version: "1.0"
+
+extension:
+  id: "ux-research"
+  name: "UX Research Phase"
+  version: "1.0.0"
+  description: "Adds a UX research phase to planning that identifies required UX changes and discovers reusable patterns from the existing tech stack."
+  author: "danieldekay"
+  repository: "https://github.com/danieldekay/spec-kit-extensions"
+  license: "MIT"
+  homepage: "https://github.com/danieldekay/spec-kit-extensions/tree/main/extensions/ux-research"
+
+requires:
+  speckit_version: ">=0.2.0"
+  commands:
+    - "speckit.plan"
+
+provides:
+  commands:
+    - name: "speckit.ux-research.analyze"
+      file: "commands/ux-research-analyze.md"
+      description: "Analyze spec for UX needs, discover existing patterns, and produce a UX research report"
+      aliases: ["speckit.ux-research.ux"]
+      user-invocable: true
+
+  config:
+    - name: "ux-research-config.yml"
+      template: "config-template.yml"
+      description: "UX research configuration (tech stack, pattern directories, component libraries)"
+      required: false
+
+hooks:
+  after_plan:
+    command: "speckit.ux-research.analyze"
+    optional: true
+    prompt: "Run UX research to identify required UX changes and reusable patterns?"
+    description: "Analyzes the spec and plan for UX touchpoints, scans existing UI patterns, and produces a ux-research-report.md"
+    condition: null
+
+tags:
+  - "ux"
+  - "research"
+  - "planning"
+  - "design"
+  - "patterns"
+
+defaults:
+  ux_research:
+    scan_depth: "full"
+    include_component_audit: true
+    include_interaction_flows: true
+    output_format: "markdown"
