@@ -16,6 +16,7 @@ Extensions add new commands and hooks to the Spec Kit workflow. Install with `sp
 
 | Extension | Hook | Description |
 |-----------|------|-------------|
+| [fleet](extensions/fleet/) | standalone | Full-lifecycle orchestrator: 10-phase workflow with human gates, cross-model review (Phase 7), parallel subagents, and auto-resume |
 | [code-quality](extensions/code-quality/) | `after_implement` | Post-implementation pipeline: code review, auto-fix, FR/NFR validation, and future ideas |
 | [ux-research](extensions/ux-research/) | `after_plan` | Analyze spec for UX needs, discover existing patterns, produce a `ux-research-report.md` |
 | [stitch-implement](extensions/stitch-implement/) | `before/after_implement` | UI prototyping and validation via [Stitch MCP](https://stitch.withgoogle.com) |

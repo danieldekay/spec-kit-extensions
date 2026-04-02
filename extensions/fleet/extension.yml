@@ -1,0 +1,79 @@
+schema_version: "1.0"
+
+extension:
+  id: "fleet"
+  name: "Fleet Orchestrator"
+  version: "1.0.0"
+  description: "Full-lifecycle feature orchestrator that drives spec -> clarify -> plan -> checklist -> tasks -> analyze -> cross-model review -> implement -> verify -> CI with human-in-the-loop gates at every phase. Detects partially complete features and resumes from the right phase. Ships two agents: fleet.run (orchestrator) and fleet.review (cross-model reviewer)."
+  author: "danieldekay"
+  repository: "https://github.com/danieldekay/spec-kit-extensions"
+  license: "MIT"
+  homepage: "https://github.com/danieldekay/spec-kit-extensions/tree/main/extensions/fleet"
+
+requires:
+  speckit_version: ">=0.2.0"
+  commands:
+    - "speckit.specify"
+    - "speckit.clarify"
+    - "speckit.plan"
+    - "speckit.checklist"
+    - "speckit.tasks"
+    - "speckit.analyze"
+    - "speckit.implement"
+
+provides:
+  commands:
+    - name: "speckit.fleet.run"
+      file: "commands/fleet-run.md"
+      description: "Orchestrate a full feature lifecycle through all SpecKit phases with human-in-the-loop checkpoints. Detects partially complete features and resumes from the right phase."
+      aliases: ["speckit.fleet"]
+      user-invocable: true
+
+    - name: "speckit.fleet.review"
+      file: "commands/fleet-review.md"
+      description: "Cross-model evaluation of plan.md and tasks.md before implementation — reviews feasibility, completeness, dependency ordering, risk, and parallelization correctness."
+      user-invocable: false
+
+    - name: "speckit.fleet.agents-install"
+      file: "commands/fleet-agents-install.md"
+      description: "Copies fleet .agent.md files to .github/agents/ for VS Code Copilot users."
+      user-invocable: true
+
+  config:
+    - name: "fleet-config.yml"
+      template: "config-template.yml"
+      description: "Fleet orchestrator configuration (model routing, phase defaults, git checkpoints)"
+      required: false
+
+# Bundled agent files for VS Code Copilot (not installed by spec-kit automatically).
+# Run speckit.fleet.agents-install or copy manually:
+#   mkdir -p .github/agents
+#   cp <extension-path>/agents/*.agent.md .github/agents/
+
+tags:
+  - "orchestrator"
+  - "workflow"
+  - "fleet"
+  - "cross-model"
+  - "review"
+  - "automation"
+  - "phases"
+
+defaults:
+  fleet:
+    models:
+      primary: "auto"
+      review: "ask"
+    phases:
+      skip_clarify: false
+      skip_checklist: false
+      skip_review: false
+      skip_verify_if_missing: true
+    git:
+      checkpoint_after_tasks: true
+      checkpoint_after_implement: true
+      checkpoint_after_verify: true
+      auto_commit: false
+    context:
+      compact_after_phase: true
+      suggest_fresh_chat_at_phase: 5

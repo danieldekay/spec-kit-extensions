@@ -1,0 +1,44 @@
+# Fleet orchestrator configuration
+# Save to .specify/extensions/fleet/fleet-config.yml
+
+fleet:
+  models:
+    # "auto" = use whatever model is running the fleet
+    primary: "auto"
+
+    # "ask" = prompt user on first run
+    # Set to a model name to use it silently: "gpt-4o", "gemini-2.0-pro", "claude-opus-4", etc.
+    review: "ask"
+
+  phases:
+    # Skip Phase 2 (Clarify) automatically
+    skip_clarify: false
+
+    # Skip Phase 4 (Checklist) automatically
+    skip_checklist: false
+
+    # Skip Phase 7 (Cross-model review) automatically
+    skip_review: false
+
+    # Skip Phase 9 (Verify) if the verify extension is not installed
+    skip_verify_if_missing: true
+
+  git:
+    # Offer a WIP commit after Phase 5 (Tasks), 8 (Implement), 9 (Verify)
+    checkpoint_after_tasks: true
+    checkpoint_after_implement: true
+    checkpoint_after_verify: true
+
+    # Never auto-commit without asking (always false)
+    auto_commit: false
+
+  context:
+    # Summarize and discard full sub-agent output after each approved gate
+    compact_after_phase: true
+
+    # Suggest a fresh chat starting at this phase number (to avoid context exhaustion)
+    suggest_fresh_chat_at_phase: 5
+
+  parallelism:
+    # Maximum number of concurrent subagents during Plan and Implement phases
+    max_concurrent: 3
