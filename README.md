@@ -16,10 +16,11 @@ Extensions add new commands and hooks to the Spec Kit workflow. Install with `sp
 
 | Extension | Hook | Description |
 |-----------|------|-------------|
-| [fleet](extensions/fleet/) | standalone | Full-lifecycle orchestrator: 10-phase workflow with human gates, cross-model review (Phase 7), parallel subagents, and auto-resume |
+| [fleet](extensions/fleet/) | standalone | Full-lifecycle orchestrator: 12-phase workflow (code-review + release-readiness added), circuit breaker, progress.md log, sync-verify and change-request commands, and auto-resume |
 | [code-quality](extensions/code-quality/) | `after_implement` | Post-implementation pipeline: code review, auto-fix, FR/NFR validation, and future ideas |
 | [ux-research](extensions/ux-research/) | `after_plan` | Analyze spec for UX needs, discover existing patterns, produce a `ux-research-report.md` |
 | [stitch-implement](extensions/stitch-implement/) | `before/after_implement` | UI prototyping and validation via [Stitch MCP](https://stitch.withgoogle.com) |
+| [maqa-github-projects](extensions/maqa-github-projects/) | standalone | GitHub Projects v2 integration for MAQA: populate draft issues from specs, move items across Status columns, tick task lists in issue body. Credit: [GenieRobot](https://github.com/GenieRobot/spec-kit-maqa-github-projects) |
 
 ## Greppable marker reference
 
