@@ -26,7 +26,6 @@ provides:
     - name: "speckit.fleet.run"
       file: "commands/fleet-run.md"
       description: "Orchestrate a full feature lifecycle through all SpecKit phases with human-in-the-loop checkpoints. Detects partially complete features and resumes from the right phase."
-      aliases: ["speckit.fleet"]
       user-invocable: true
 
     - name: "speckit.fleet.review"
