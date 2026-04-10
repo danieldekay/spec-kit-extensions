@@ -3,8 +3,8 @@ schema_version: "1.0"
 extension:
   id: "fleet"
   name: "Fleet Orchestrator"
-  version: "0.2.0"
-  description: "Autonomous 17-phase feature lifecycle orchestrator: specify → dod-generate → clarify → plan → codebase-impact → ux-research → checklist → tasks → analyze → review → stitch-prototype → implement → dod-validate → stitch-validate → code-review (adversarial multi-model) → release-readiness → CI. Auto-resumes, WIP auto-commits after every phase, auto-stashes dirty worktrees, and only interrupts via vscode_askQuestions for critical blockers or final ship approval. DoD, Codebase Impact, UX Research, and Stitch phases auto-skip when their extension is missing or the feature has no UI."
+  version: "1.0.0"
+  description: "All-in-one 17-phase feature lifecycle orchestrator with bundled DoD, Codebase Impact, UX Research, Stitch prototyping, and Code Quality sub-commands. One install brings the full pipeline: specify → dod-generate → clarify → plan → codebase-impact → ux-research → checklist → tasks → analyze → review → stitch-prototype → implement → dod-validate → stitch-validate → code-review (adversarial multi-model) → release-readiness → CI."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
   license: "MIT"
@@ -20,13 +20,15 @@ requires:
     - "speckit.tasks"
     - "speckit.analyze"
     - "speckit.implement"
-    - "speckit.dod.generate"
-    - "speckit.dod.validate"
-    - "speckit.codebase-impact.analyze"
-    - "speckit.code-quality.pipeline"
+  tools:
+    - name: "stitch"
+      version: ">=1.0.0"
+      required: false
+      url: "https://stitch.withgoogle.com"
 
 provides:
   commands:
+    # ── Fleet orchestration ────────────────────────────────────────────
     - name: "speckit.fleet.run"
       file: "commands/fleet-run.md"
       description: "Orchestrate a full feature lifecycle through all SpecKit phases with auto-resume and autonomous operation. Uses vscode_askQuestions only for critical blockers and final ship approval."
@@ -53,16 +55,143 @@ provides:
       description: "Formal scope change management. Assigns CR-NNN identifiers, performs impact analysis across all artifacts, and updates affected files with CR markers."
       user-invocable: true
 
+    # ── Definition of Done (bundled from dod extension) ────────────────
+    - name: "speckit.fleet.dod-generate"
+      file: "commands/dod-generate.md"
+      description: "Parse spec.md and generate dod.yml with machine-readable, testable DoD criteria for each FR and NFR"
+      aliases: ["speckit.fleet.dod-gen"]
+      user-invocable: true
+
+    - name: "speckit.fleet.dod-validate"
+      file: "commands/dod-validate.md"
+      description: "Validate the current implementation against dod.yml, update criterion statuses, and write a validation report"
+      aliases: ["speckit.fleet.dod-check"]
+      user-invocable: true
+
+    - name: "speckit.fleet.dod-export"
+      file: "commands/dod-export.md"
+      description: "Export dod.yml to specfact-compatible JSON for CI/CD enforcement and specfact governance checks"
+      aliases: ["speckit.fleet.dod-sf"]
+      user-invocable: true
+
+    - name: "speckit.fleet.dod-report"
+      file: "commands/dod-report.md"
+      description: "Generate a human-readable DoD status report summarising coverage, gate status, and open items"
+      aliases: ["speckit.fleet.dod-rpt"]
+      user-invocable: true
+
+    # ── Codebase Impact (bundled from codebase-impact extension) ───────
+    - name: "speckit.fleet.codebase-impact-analyze"
+      file: "commands/codebase-impact-analyze.md"
+      description: "Scan the codebase for integration points, affected features, and dependency stability. Produces codebase-impact.md with IMPACT-NNN task candidates."
+      aliases: ["speckit.fleet.impact"]
+      user-invocable: true
+
+    # ── UX Research (bundled from ux-research extension) ───────────────
+    - name: "speckit.fleet.ux-research-analyze"
+      file: "commands/ux-research-analyze.md"
+      description: "Analyze spec for UX needs, discover existing patterns, and produce a UX research report"
+      aliases: ["speckit.fleet.ux"]
+      user-invocable: true
+
+    # ── Stitch MCP (bundled from stitch-implement extension) ───────────
+    - name: "speckit.fleet.stitch-prototype"
+      file: "commands/stitch-prototype.md"
+      description: "Generate or validate UI screens via Stitch MCP during implementation"
+      aliases: ["speckit.fleet.stitch-ui"]
+      user-invocable: true
+
+    - name: "speckit.fleet.stitch-validate"
+      file: "commands/stitch-validate.md"
+      description: "Validate implemented UI against Stitch prototypes and design tokens"
+      user-invocable: true
+
+    - name: "speckit.fleet.stitch-setup"
+      file: "commands/stitch-setup.md"
+      description: "Discover Stitch projects and design master screens, write config override"
+      user-invocable: true
+
+    # ── Code Quality (bundled from code-quality extension) ─────────────
+    - name: "speckit.fleet.code-review"
+      file: "commands/code-review.md"
+      description: "Code review: identify refactoring opportunities, tech debt, dead code, and code smells"
+      aliases: ["speckit.fleet.cr"]
+      user-invocable: true
+
+    - name: "speckit.fleet.code-fix"
+      file: "commands/code-fix.md"
+      description: "Auto-fix issues identified in the code review report"
+      aliases: ["speckit.fleet.cf"]
+
+    - name: "speckit.fleet.future-ideas"
+      file: "commands/future-ideas.md"
+      description: "Generate ideas for improving and extending the feature"
+      aliases: ["speckit.fleet.fi"]
+
+    - name: "speckit.fleet.validate-requirements"
+      file: "commands/validate-requirements.md"
+      description: "Validate FR/NFR implementation, testability, and documentation coverage"
+      aliases: ["speckit.fleet.vr"]
+
+    - name: "speckit.fleet.quality-pipeline"
+      file: "commands/quality-pipeline.md"
+      description: "Run the full quality pipeline: review → fix → validate → future ideas → specfact sync"
+      aliases: ["speckit.fleet.qa"]
+      user-invocable: true
+
+    - name: "speckit.fleet.specfact-sync"
+      file: "commands/specfact-sync.md"
+      description: "Export quality findings to specfact-compatible JSON and optionally run specfact govern check for CI/CD enforcement"
+      aliases: ["speckit.fleet.sf"]
+      user-invocable: true
+
   config:
     - name: "fleet-config.yml"
       template: "config-template.yml"
-      description: "Fleet orchestrator configuration (model routing, phase defaults, git checkpoints)"
+      description: "Fleet configuration — orchestrator, DoD, codebase impact, UX research, stitch, and code quality settings"
       required: false
 
 # Bundled agent files for VS Code Copilot (not installed by spec-kit automatically).
 # Run speckit.fleet.agents-install or copy manually:
 #   mkdir -p .github/agents
 #   cp <extension-path>/agents/*.agent.md .github/agents/
+
+hooks:
+  after_specify:
+    command: "speckit.fleet.dod-generate"
+    optional: true
+    prompt: "Generate machine-readable Definition of Done from spec.md?"
+    description: "Parses FR/NFR tables in spec.md and writes dod.yml with testable criteria and measurement thresholds"
+
+  after_plan:
+    - command: "speckit.fleet.codebase-impact-analyze"
+      optional: true
+      prompt: "Run codebase impact analysis to identify integration points and required changes to existing code?"
+      description: "Scans the codebase for files and features affected by the planned work, producing codebase-impact.md with IMPACT-NNN task candidates."
+    - command: "speckit.fleet.ux-research-analyze"
+      optional: true
+      prompt: "Run UX research to identify required UX changes and reusable patterns?"
+      description: "Analyzes the spec and plan for UX touchpoints, scans existing UI patterns, and produces a ux-research-report.md"
+
+  before_implement:
+    command: "speckit.fleet.stitch-prototype"
+    optional: true
+    prompt: "Generate UI prototypes via Stitch before implementation?"
+    description: "Creates screen prototypes and extracts component patterns for UI-related tasks"
+
+  after_implement:
+    - command: "speckit.fleet.dod-validate"
+      optional: true
+      prompt: "Validate implementation against Definition of Done?"
+      description: "Checks test coverage for each FR criterion and measures NFR thresholds; updates dod.yml statuses"
+    - command: "speckit.fleet.stitch-validate"
+      optional: true
+      prompt: "Validate implemented UI against Stitch prototypes?"
+      description: "Compares implementation output against Stitch screen designs for visual consistency"
+    - command: "speckit.fleet.quality-pipeline"
+      optional: true
+      prompt: "Run the full code quality pipeline (review → fix → validate → future ideas)?"
+      description: "Comprehensive post-implementation quality check: reviews code, fixes issues, validates requirements, and generates improvement ideas"
 
 tags:
   - "orchestrator"
@@ -72,6 +201,12 @@ tags:
   - "review"
   - "automation"
   - "phases"
+  - "definition-of-done"
+  - "impact"
+  - "ux"
+  - "stitch"
+  - "code-quality"
+  - "specfact"
 
 changelog: "https://github.com/danieldekay/spec-kit-extensions/blob/main/extensions/fleet/CHANGELOG.md"
 
@@ -158,6 +293,183 @@ config_schema:
             threshold:
               type: "string"
               enum: ["critical", "high", "medium", "low"]
+    dod:
+      type: "object"
+      properties:
+        criteria_per_fr:
+          type: "integer"
+          description: "Default number of DoD criteria to generate per FR (min 1, max 5)"
+        nfr_defaults:
+          type: "object"
+          description: "Default measurement methods per NFR category"
+        enforcement_level:
+          type: "string"
+          enum: ["observe", "warn", "enforce"]
+          description: "specfact enforcement level for CI gates"
+        specfact:
+          type: "object"
+          properties:
+            project_id:
+              type: "string"
+            feature_tag_prefix:
+              type: "string"
+            export_on_validate:
+              type: "boolean"
+            export_path:
+              type: "string"
+    codebase_impact:
+      type: "object"
+      properties:
+        scan_depth:
+          type: "string"
+          enum: ["full", "shallow", "targeted"]
+        scan_directories:
+          type: "array"
+          items:
+            type: "string"
+        exclude_directories:
+          type: "array"
+          items:
+            type: "string"
+        risk_threshold:
+          type: "string"
+          enum: ["LOW", "MED", "HIGH"]
+        include_test_impact:
+          type: "boolean"
+        include_dependency_stability:
+          type: "boolean"
+        output_format:
+          type: "string"
+          enum: ["markdown", "json"]
+    ux_research:
+      type: "object"
+      properties:
+        scan_depth:
+          type: "string"
+          enum: ["full", "shallow", "targeted"]
+        include_component_audit:
+          type: "boolean"
+        include_interaction_flows:
+          type: "boolean"
+        output_format:
+          type: "string"
+          enum: ["markdown", "json"]
+        pattern_directories:
+          type: "array"
+          items:
+            type: "string"
+        tech_stack:
+          type: "array"
+          items:
+            type: "string"
+        component_registries:
+          type: "array"
+          items:
+            type: "string"
+    stitch:
+      type: "object"
+      properties:
+        mode:
+          type: "string"
+          enum: ["prototype", "validate", "both"]
+        auto_extract_code:
+          type: "boolean"
+        variant_count:
+          type: "integer"
+          minimum: 1
+          maximum: 5
+        resolution:
+          type: "string"
+        project_prefix:
+          type: "string"
+        output_directory:
+          type: "string"
+        skip_backend_tasks:
+          type: "boolean"
+        projects:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id: { type: "string" }
+              name: { type: "string" }
+              device_type:
+                type: "string"
+                enum: ["DESKTOP", "MOBILE", "TABLET"]
+        design_masters:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id: { type: "string" }
+              project_id: { type: "string" }
+              label: { type: "string" }
+    code_quality:
+      type: "object"
+      properties:
+        review:
+          type: "object"
+          properties:
+            include_refactoring:
+              type: "boolean"
+            include_tech_debt:
+              type: "boolean"
+            include_dead_code:
+              type: "boolean"
+            include_code_smells:
+              type: "boolean"
+            severity_threshold:
+              type: "string"
+              enum: ["low", "medium", "high", "critical"]
+        fix:
+          type: "object"
+          properties:
+            auto_fix_minor:
+              type: "boolean"
+            auto_fix_major:
+              type: "boolean"
+            max_fix_cycles:
+              type: "integer"
+              minimum: 1
+              maximum: 10
+        validate:
+          type: "object"
+          properties:
+            check_fr:
+              type: "boolean"
+            check_nfr:
+              type: "boolean"
+            check_testability:
+              type: "boolean"
+            check_documentation:
+              type: "boolean"
+        future:
+          type: "object"
+          properties:
+            horizon:
+              type: "string"
+            include_performance:
+              type: "boolean"
+            include_scalability:
+              type: "boolean"
+            include_dx:
+              type: "boolean"
+        specfact:
+          type: "object"
+          properties:
+            project_id:
+              type: ["string", "null"]
+            enforcement_level:
+              type: "string"
+              enum: ["observe", "warn", "enforce"]
+            sync_after_validate:
+              type: "boolean"
+            sync_after_pipeline:
+              type: "boolean"
+            export_path:
+              type: "string"
+            update_dod:
+              type: "boolean"
 
 defaults:
   fleet:
@@ -175,7 +487,7 @@ defaults:
       skip_dod: false
       skip_impact: false
     qa:
-      cadence: "per_phase"      # per_phase | batch_end
+      cadence: "per_phase"
       run_review: true
       run_fix: true
       run_validate: true
@@ -189,3 +501,88 @@ defaults:
     context:
       compact_after_phase: true
       suggest_fresh_chat_at_phase: 5
+  dod:
+    criteria_per_fr: 2
+    nfr_defaults:
+      performance:
+        method: "benchmark"
+        tool: ""
+      security:
+        method: "automated"
+        tool: "SAST"
+      accessibility:
+        method: "automated"
+        tool: "axe-core"
+      availability:
+        method: "monitoring"
+        tool: ""
+      scalability:
+        method: "benchmark"
+        tool: ""
+      compatibility:
+        method: "automated"
+        tool: ""
+      maintainability:
+        method: "audit"
+        tool: ""
+    enforcement_level: "observe"
+    specfact:
+      project_id: null
+      feature_tag_prefix: "sk-"
+      export_on_validate: false
+      export_path: ".specfact/dod-exports"
+  codebase_impact:
+    scan_depth: "full"
+    scan_directories: []
+    exclude_directories:
+      - "node_modules"
+      - ".git"
+      - "dist"
+      - "build"
+      - ".specify"
+      - "vendor"
+      - "__pycache__"
+      - ".venv"
+    risk_threshold: "LOW"
+    include_test_impact: true
+    include_dependency_stability: true
+    output_format: "markdown"
+  ux_research:
+    scan_depth: "full"
+    include_component_audit: true
+    include_interaction_flows: true
+    output_format: "markdown"
+  stitch:
+    mode: "both"
+    auto_extract_code: true
+    variant_count: 2
+    resolution: "1024x768"
+    projects: []
+    design_masters: []
+  code_quality:
+    review:
+      include_refactoring: true
+      include_tech_debt: true
+      include_dead_code: true
+      include_code_smells: true
+      severity_threshold: "medium"
+    fix:
+      auto_fix_minor: true
+      auto_fix_major: false
+      max_fix_cycles: 3
+    validate:
+      check_fr: true
+      check_nfr: true
+      check_testability: true
+      check_documentation: true
+    future:
+      horizon: "short,medium,long"
+      include_performance: true
+      include_scalability: true
+    specfact:
+      project_id: null
+      enforcement_level: "observe"
+      sync_after_validate: false
+      sync_after_pipeline: false
+      export_path: ".specfact/quality-exports"
+      update_dod: true

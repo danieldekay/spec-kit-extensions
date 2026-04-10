@@ -1,6 +1,6 @@
 ---
-id: speckit.code-quality.specfact-sync
-alias: speckit.code-quality.sf
+id: speckit.fleet.specfact-sync
+alias: speckit.fleet.sf
 description: >
   Aggregates all code-quality review artifacts into a specfact-compatible
   quality-export.json and optionally runs `specfact govern check` against the
@@ -23,7 +23,7 @@ arguments:
 version: "1.0"
 ---
 
-# speckit.code-quality.specfact-sync
+# speckit.fleet.specfact-sync
 
 Export code-quality findings to specfact and run governance checks.
 

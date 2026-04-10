@@ -16,12 +16,7 @@ Extensions add new commands and hooks to the Spec Kit workflow. Install with `sp
 
 | Extension | Hook | Description |
 |-----------|------|-------------|
-| [fleet](extensions/fleet/) | standalone | Full-lifecycle orchestrator: 14-phase workflow (UX research, Stitch prototyping/validation, code-review, release-readiness), circuit breaker, progress.md log, sync and change-request commands, and auto-resume |
-| [code-quality](extensions/code-quality/) | `after_implement` | Post-implementation pipeline: code review, auto-fix, FR/NFR validation, and future ideas |
-| [dod](extensions/dod/) | `after_specify` / `after_implement` | Machine-readable, testable Definitions of Done for FR and NFR. Generates `dod.yml` from `spec.md`, validates against implementation, and exports to [specfact.com](https://specfact.com) for CI/CD enforcement |
-| [codebase-impact](extensions/codebase-impact/) | `after_plan` | Scan existing codebase for integration points, affected features, dependency stability, and IMPACT-NNN task candidates for `tasks.md` |
-| [ux-research](extensions/ux-research/) | `after_plan` | Analyze spec for UX needs, discover existing patterns, produce a `ux-research-report.md` |
-| [stitch-implement](extensions/stitch-implement/) | `before/after_implement` | UI prototyping and validation via [Stitch MCP](https://stitch.withgoogle.com) |
+| [fleet](extensions/fleet/) | standalone | All-in-one 17-phase lifecycle orchestrator with bundled DoD, Codebase Impact, UX Research, Stitch MCP, and Code Quality — 20 commands, one install |
 | [maqa-github-projects](extensions/maqa-github-projects/) | standalone | GitHub Projects v2 integration for MAQA: populate draft issues from specs, move items across Status columns, tick task lists in issue body. Credit: [GenieRobot](https://github.com/GenieRobot/spec-kit-maqa-github-projects) |
 
 ## Greppable marker reference

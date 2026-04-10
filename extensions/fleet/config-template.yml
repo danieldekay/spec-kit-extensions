@@ -1,5 +1,8 @@
-# Fleet orchestrator configuration
+# Fleet orchestrator configuration (all-in-one)
 # Save to .specify/extensions/fleet/fleet-config.yml
+#
+# This single file configures the Fleet orchestrator AND all bundled
+# sub-capabilities: DoD, Codebase Impact, UX Research, Stitch, Code Quality.
 #
 # Local overrides (gitignored, never commit model choices or personal prefs):
 #   .specify/extensions/fleet/fleet-config.local.yml
@@ -12,6 +15,9 @@
 #   > fleet-config.yml (this file)
 #   > extension defaults (extension.yml)
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Fleet orchestrator
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 fleet:
   models:
     # "auto" = use whatever model is running the fleet
@@ -22,87 +28,184 @@ fleet:
     review: "ask"
 
   phases:
-    # Skip Phases 2+13 (DoD Generate/Validate) automatically — or pass --skip-dod at runtime
-    skip_dod: false
-
-    # Skip Phase 3 (Clarify) automatically — or pass --skip-clarify at runtime
-    skip_clarify: false
-
-    # Skip Phase 6 (UX Research) automatically — or pass --skip-ux at runtime
-    # Auto-skips when spec.md/plan.md contain no UI keywords
-    skip_ux: false
-
-    # Skip Phase 5 (Codebase Impact) automatically — or pass --skip-impact at runtime
-    skip_impact: false
-
-    # Skip Phase 7 (Checklist) automatically — or pass --skip-checklist at runtime
-    skip_checklist: false
-
-    # Skip Phase 10 (Cross-model review) automatically — or pass --skip-review at runtime
-    skip_review: false
-
-    # Skip Phases 11+14 (Stitch Prototype/Validate) automatically — or pass --skip-stitch at runtime
-    # Auto-skips when spec.md/plan.md contain no UI keywords
-    skip_stitch: false
-
-    # Skip Phase 15 (Code Review) automatically — or pass --skip-code-review at runtime
-    skip_code_review: false
-
-    # Skip Phase 16 (Release Readiness) automatically — or pass --skip-release at runtime
-    skip_release: false
+    skip_dod: false          # Skip Phases 2+13 (DoD Generate/Validate)
+    skip_clarify: false      # Skip Phase 3 (Clarify)
+    skip_impact: false       # Skip Phase 5 (Codebase Impact)
+    skip_ux: false           # Skip Phase 6 (UX Research) — auto-skips if no UI
+    skip_checklist: false    # Skip Phase 7 (Checklist)
+    skip_review: false       # Skip Phase 10 (Cross-model review)
+    skip_stitch: false       # Skip Phases 11+14 (Stitch) — auto-skips if no UI
+    skip_code_review: false  # Skip Phase 15 (Code Review)
+    skip_release: false      # Skip Phase 16 (Release Readiness)
 
   qa:
-    # When to run the Phase 15 code-quality pipeline
-    #   per_phase: immediately after Phase 12 (Implement) — default
-    #   batch_end: run once at the end of all implementation batches
-    cadence: "per_phase"
-
-    # Toggle individual code-quality pipeline stages (Phase 15)
-    run_review: true     # Generate reviews/code-review.md
-    run_fix: true        # Apply auto-fixes and generate reviews/code-fix-report.md
-    run_validate: true   # Generate reviews/validation-report.md
-    run_future: true     # Generate reviews/future-ideas.md
-
-    # Pause Fleet if the pipeline leaves unresolved CRITICAL findings
-    pause_on_critical: true
+    cadence: "per_phase"     # per_phase | batch_end
+    run_review: true         # Generate reviews/code-review.md
+    run_fix: true            # Apply auto-fixes
+    run_validate: true       # Generate reviews/validation-report.md
+    run_future: true         # Generate reviews/future-ideas.md
+    pause_on_critical: true  # Pause if CRITICAL findings remain
 
   git:
-    # Legacy: WIP commit checkpoints (superseded by auto_commit)
     checkpoint_after_tasks: true
     checkpoint_after_implement: true
-
-    # Auto-commit WIP after every artifact-producing phase (default: true)
-    # When false, falls back to asking via vscode_askQuestions after Phases 8 and 12 only
-    auto_commit: true
-
-    # Auto-stash uncommitted changes before fleet run (default: true)
-    # When false, uses vscode_askQuestions to ask Continue / Stash / Abort
-    auto_stash: true
+    auto_commit: true        # WIP auto-commit after every artifact-producing phase
+    auto_stash: true         # Auto-stash uncommitted changes before fleet run
 
   context:
-    # Summarize and discard full sub-agent output after each approved gate
     compact_after_phase: true
-
-    # Suggest a fresh chat starting at this phase number (to avoid context exhaustion)
     suggest_fresh_chat_at_phase: 8
 
   parallelism:
-    # Maximum number of concurrent subagents during Plan, Implement, and Code Review phases
     max_concurrent: 3
 
   adversarial:
-    # Enable adversarial multi-model review pass during Phase 15 (Code Review)
-    # Dispatches 2-3 review subagents in parallel on different AI models,
-    # each independently reviewing the diff for bugs, security, logic errors.
-    # Inspired by the Anvil agent pattern.
     enabled: true
-
-    # Models to use for adversarial review (each reviewer runs on a different model)
-    # Ensure the agent runtime has access to these models.
     models:
       - "gpt-4.1"
       - "gemini-2.5-pro"
       - "claude-sonnet-4"
+    threshold: "medium"      # critical | high | medium | low
 
-    # Minimum severity to report: "critical", "high", "medium", or "low"
-    threshold: "medium"
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Definition of Done (Phase 2 + 13)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+dod:
+  criteria_per_fr: 2
+
+  nfr_defaults:
+    performance:
+      method: "benchmark"        # benchmark | monitoring | manual
+      tool: ""
+    security:
+      method: "automated"        # automated | audit | manual
+      tool: "SAST"
+    accessibility:
+      method: "automated"
+      tool: "axe-core"
+    availability:
+      method: "monitoring"
+      tool: ""
+    scalability:
+      method: "benchmark"
+      tool: ""
+    compatibility:
+      method: "automated"
+      tool: ""
+    maintainability:
+      method: "audit"
+      tool: ""
+
+  enforcement_level: "observe"   # observe | warn | enforce
+
+  specfact:
+    project_id: null
+    feature_tag_prefix: "sk-"
+    export_on_validate: false
+    export_path: ".specfact/dod-exports"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Codebase Impact Analysis (Phase 5)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+codebase_impact:
+  scan_depth: "full"             # full | shallow | targeted
+  scan_directories: []           # only used when scan_depth: "targeted"
+  exclude_directories:
+    - "node_modules"
+    - ".git"
+    - "dist"
+    - "build"
+    - ".specify"
+    - "vendor"
+    - "__pycache__"
+    - ".venv"
+  risk_threshold: "LOW"          # LOW | MED | HIGH
+  include_test_impact: true
+  include_dependency_stability: true
+  output_format: "markdown"      # markdown | json
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# UX Research (Phase 6)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ux_research:
+  scan_depth: "full"
+  include_component_audit: true
+  include_interaction_flows: true
+  output_format: "markdown"
+  pattern_directories:
+    - "src/components"
+    - "src/views"
+    - "src/pages"
+    - "src/layouts"
+    - "src/ui"
+  tech_stack: []                 # auto-detected if empty
+  component_registries:
+    - "shadcn"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Stitch MCP Integration (Phases 11 + 14)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+stitch:
+  mode: "both"                   # prototype | validate | both
+  auto_extract_code: true
+  variant_count: 2
+  resolution: "1024x768"
+  project_prefix: "speckit"
+  output_directory: "design-artifacts"
+  skip_backend_tasks: true
+
+  # Discovered via speckit.fleet.stitch-setup
+  projects: []
+    # - id: "6139132077804554844"
+    #   name: "My App"
+    #   device_type: "DESKTOP"
+
+  design_masters: []
+    # - id: "d7237c7d78f44befa4f60afb17c818c1"
+    #   project_id: "6139132077804554844"
+    #   label: "Homepage hero"
+
+  # Companion skills:
+  #   npx skills add https://github.com/google-labs-code/stitch-skills --skill stitch-loop
+  #   npx skills add https://github.com/google-labs-code/stitch-skills --skill taste-design
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Code Quality Pipeline (Phase 15)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+code_quality:
+  review:
+    include_refactoring: true
+    include_tech_debt: true
+    include_dead_code: true
+    include_code_smells: true
+    severity_threshold: "medium"
+    principles:
+      - "SOLID"
+      - "DRY"
+      - "YAGNI"
+      - "KISS"
+
+  fix:
+    auto_fix_minor: true
+    auto_fix_major: false
+    max_fix_cycles: 3
+
+  validate:
+    check_fr: true
+    check_nfr: true
+    check_testability: true
+    check_documentation: true
+
+  future:
+    horizon: "short,medium,long"
+    include_performance: true
+    include_scalability: true
+    include_dx: true
+
+  specfact:
+    project_id: null
+    enforcement_level: "observe"   # observe | warn | enforce
+    sync_after_validate: false
+    sync_after_pipeline: false
+    export_path: ".specfact/quality-exports"
+    update_dod: true

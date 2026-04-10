@@ -12,20 +12,20 @@ scripts:
   ps: scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
 agents:
   - speckit.specify
-  - speckit.dod.generate
+  - speckit.fleet.dod-generate
   - speckit.clarify
   - speckit.plan
-  - speckit.codebase-impact.analyze
-  - speckit.ux-research.analyze
+  - speckit.fleet.codebase-impact-analyze
+  - speckit.fleet.ux-research-analyze
   - speckit.checklist
   - speckit.tasks
   - speckit.analyze
   - speckit.fleet.review
-  - speckit.stitch-implement.prototype
+  - speckit.fleet.stitch-prototype
   - speckit.implement
-  - speckit.dod.validate
-  - speckit.stitch-implement.validate
-  - speckit.code-quality.pipeline
+  - speckit.fleet.dod-validate
+  - speckit.fleet.stitch-validate
+  - speckit.fleet.quality-pipeline
 user-invocable: true
 disable-model-invocation: true
 ---
@@ -52,20 +52,20 @@ You are the **SpecKit Fleet Orchestrator** -- an autonomous workflow conductor t
 | Phase | Optional | Agent | Artifact Signal | Hard Gate |
 |-------|----------|-------|-----------------|-----------|
 | 1. Specify | — | `speckit.specify` | `spec.md` exists in FEATURE_DIR | Start/resume confirmation only |
-| 2. DoD Generate | `--skip-dod` | `speckit.dod.generate` | `dod.yml` exists in FEATURE_DIR | Auto-continue |
+| 2. DoD Generate | `--skip-dod` | `speckit.fleet.dod-generate` | `dod.yml` exists in FEATURE_DIR | Auto-continue |
 | 3. Clarify | `--skip-clarify` | `speckit.clarify` | `spec.md` contains a `## Clarifications` section | Ask only if unresolved questions remain |
 | 4. Plan | — | `speckit.plan` | `plan.md` exists in FEATURE_DIR | Auto-continue |
-| 5. Codebase Impact | `--skip-impact` | `speckit.codebase-impact.analyze` | `codebase-impact.md` exists in FEATURE_DIR | Auto-continue |
-| 6. UX Research | `--skip-ux` | `speckit.ux-research.analyze` | `ux-research-report.md` exists in FEATURE_DIR | Auto-skip if feature has no UI; auto-continue otherwise |
+| 5. Codebase Impact | `--skip-impact` | `speckit.fleet.codebase-impact-analyze` | `codebase-impact.md` exists in FEATURE_DIR | Auto-continue |
+| 6. UX Research | `--skip-ux` | `speckit.fleet.ux-research-analyze` | `ux-research-report.md` exists in FEATURE_DIR | Auto-skip if feature has no UI; auto-continue otherwise |
 | 7. Checklist | `--skip-checklist` | `speckit.checklist` | `checklists/` directory exists and contains at least one file | Auto-continue |
 | 8. Tasks | — | `speckit.tasks` | `tasks.md` exists in FEATURE_DIR | Checkpoint commit approval only |
 | 9. Analyze | — | `speckit.analyze` | `.analyze-done` marker exists in FEATURE_DIR | Auto-continue |
 | 10. Review | `--skip-review` | `speckit.fleet.review` | `review.md` exists in FEATURE_DIR | Ask only for FAIL findings, override, or skip |
-| 11. Stitch Prototype | `--skip-stitch` | `speckit.stitch-implement.prototype` | `.stitch-prototype-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; auto-continue otherwise |
+| 11. Stitch Prototype | `--skip-stitch` | `speckit.fleet.stitch-prototype` | `.stitch-prototype-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; auto-continue otherwise |
 | 12. Implement | — | `speckit.implement` | ALL task checkboxes in tasks.md are `[x]` (none `[ ]`) | Ask only on blockers or circuit breaker |
-| 13. DoD Validate | `--skip-dod` | `speckit.dod.validate` | `.dod-validate-done` marker exists in FEATURE_DIR | Ask only if criteria not met |
-| 14. Stitch Validate | `--skip-stitch` | `speckit.stitch-implement.validate` | `.stitch-validate-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; ask only for validation failures |
-| 15. Code Review | `--skip-code-review` | `speckit.code-quality.pipeline` + adversarial | `.code-review-done` marker exists in FEATURE_DIR | Ask only if unresolved critical findings remain |
+| 13. DoD Validate | `--skip-dod` | `speckit.fleet.dod-validate` | `.dod-validate-done` marker exists in FEATURE_DIR | Ask only if criteria not met |
+| 14. Stitch Validate | `--skip-stitch` | `speckit.fleet.stitch-validate` | `.stitch-validate-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; ask only for validation failures |
+| 15. Code Review | `--skip-code-review` | `speckit.fleet.quality-pipeline` + adversarial | `.code-review-done` marker exists in FEATURE_DIR | Ask only if unresolved critical findings remain |
 | 16. Release Readiness | `--skip-release` | Fleet orchestrator | `release-readiness.md` exists in FEATURE_DIR | Final ship/readiness approval |
 | 17. Tests | — | Terminal | Tests pass | Ask only if CI remediation choice is needed |
 
@@ -77,8 +77,8 @@ You are the **SpecKit Fleet Orchestrator** -- an autonomous workflow conductor t
    ALL other phases auto-continue — including start/resume, git commits, clarify, checklist, analyze, and auto-skippable phases. Never stop between phases to "confirm" or "approve" unless one of the two conditions above is met.
    **CRITICAL: When a hard gate requires human input, ALWAYS use the `vscode_askQuestions` tool with structured options. Never present choices as markdown bullet lists, numbered menus, or plain-text prompts.**
 2. **Clarify is repeatable.** If `speckit.clarify` finds unresolved questions, use `vscode_askQuestions` to get answers, otherwise auto-advance.
-3. **Companion extensions.** DoD (Phases 2 & 13), Codebase Impact (Phase 5), UX Research (Phase 6), Stitch (Phases 11 & 14), and Code Quality (Phase 15) are formal phases that auto-skip gracefully when their extension is missing or the feature has no UI.
-   - **Before resuming:** Audit whether `speckit.dod.generate`, `speckit.dod.validate`, `speckit.codebase-impact.analyze`, `speckit.ux-research.analyze`, `speckit.stitch-implement.prototype`, `speckit.stitch-implement.validate`, and `speckit.code-quality.pipeline` are available. If a companion command is missing, use `vscode_askQuestions` to offer install, skip the affected phase, or continue in degraded mode.
+3. **Companion extensions.** DoD (Phases 2 & 13), Codebase Impact (Phase 5), UX Research (Phase 6), Stitch (Phases 11 & 14), and Code Quality (Phase 15) are built-in fleet capabilities that auto-skip gracefully when the feature has no UI.
+   - **Before resuming:** Audit whether `speckit.fleet.dod-generate`, `speckit.fleet.dod-validate`, `speckit.fleet.codebase-impact-analyze`, `speckit.fleet.ux-research-analyze`, `speckit.fleet.stitch-prototype`, `speckit.fleet.stitch-validate`, and `speckit.fleet.quality-pipeline` are available. All are bundled with fleet — if any are missing the installation may be corrupted.
    - **UI detection:** Scan `spec.md` and `plan.md` for UI-related keywords (component, page, screen, layout, form, modal, button, dialog, UI, UX, frontend, view, template, style, CSS, HTML, design). If none are found, auto-skip Phases 6, 11, and 14 without prompting.
 4. **Track progress.** Use the todo tool to create and update a checklist of all 17 phases so the user always sees where they are.
 5. **Pass context forward -- compactly.** When delegating, include only a **structured context summary** -- not the full output of previous phases. The summary should contain:
@@ -338,33 +338,33 @@ For each phase:
 
 Skip this phase by passing `--skip-dod` or setting `phases.skip_dod: true` in config.
 
-1. Delegate to `speckit.dod.generate` with `spec.md` as context
+1. Delegate to `speckit.fleet.dod-generate` with `spec.md` as context
 2. The DoD agent produces `{FEATURE_DIR}/dod.yml` — a machine-readable definition of done with testable acceptance criteria
 3. Summarize the number of criteria generated and auto-continue to Phase 3
 
-If `speckit.dod.generate` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
+If `speckit.fleet.dod-generate` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
 
 ## Phase 5: Codebase Impact
 
 Skip this phase by passing `--skip-impact` or setting `phases.skip_impact: true` in config.
 
-1. Delegate to `speckit.codebase-impact.analyze` with `spec.md` and `plan.md` as context
+1. Delegate to `speckit.fleet.codebase-impact-analyze` with `spec.md` and `plan.md` as context
 2. The impact agent scans the existing codebase for integration points, affected features, dependency stability, and test impact
 3. Save output to `{FEATURE_DIR}/codebase-impact.md` with greppable `IMPACT-NNN` task candidates
 4. Summarize key findings (integration points, risk areas) and auto-continue to Phase 6
 5. IMPACT-NNN candidates will be consumed by Phase 8 (Tasks) to enrich the task list
 
-If `speckit.codebase-impact.analyze` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
+If `speckit.fleet.codebase-impact-analyze` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
 
 ## Phase 6: UX Research
 
 Skip this phase by passing `--skip-ux` or setting `phases.skip_ux: true` in config. Auto-skipped when spec and plan contain no UI-related keywords.
 
-1. Delegate to `speckit.ux-research.analyze` with `spec.md` and `plan.md` as context
+1. Delegate to `speckit.fleet.ux-research-analyze` with `spec.md` and `plan.md` as context
 2. Save output to `{FEATURE_DIR}/ux-research-report.md`
 3. Summarize key UX findings and auto-continue to Phase 7
 
-If `speckit.ux-research.analyze` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
+If `speckit.fleet.ux-research-analyze` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
 
 ## Phase 10: Cross-Model Review
 
@@ -384,12 +384,12 @@ If `speckit.ux-research.analyze` is not installed, use `vscode_askQuestions` to 
 
 Skip this phase by passing `--skip-stitch` or setting `phases.skip_stitch: true` in config. Auto-skipped when spec and plan contain no UI-related keywords.
 
-1. Delegate to `speckit.stitch-implement.prototype` with `spec.md`, `plan.md`, and `ux-research-report.md` (if available) as context
+1. Delegate to `speckit.fleet.stitch-prototype` with `spec.md`, `plan.md`, and `ux-research-report.md` (if available) as context
 2. The Stitch agent generates UI prototypes and mockups based on the design artifacts
 3. Summarize the prototypes created and auto-continue to Phase 12 (Implement)
 4. Create `{FEATURE_DIR}/.stitch-prototype-done` with timestamp
 
-If `speckit.stitch-implement.prototype` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
+If `speckit.fleet.stitch-prototype` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
 
 ## Phase 13: DoD Validate
 
@@ -402,13 +402,13 @@ Validate the implementation against the machine-readable Definition of Done crit
 ### Execution
 
 1. Auto-skip if `{FEATURE_DIR}/dod.yml` does not exist
-2. Delegate to `speckit.dod.validate` with `dod.yml`, `tasks.md`, and the implementation artifacts as context
+2. Delegate to `speckit.fleet.dod-validate` with `dod.yml`, `tasks.md`, and the implementation artifacts as context
 3. The DoD agent evaluates each criterion against the current codebase state
 4. If all criteria pass, auto-continue to Phase 14 (Stitch Validate)
 5. If criteria are not met, use `vscode_askQuestions` to choose **Fix now** (loop back to Implement), **Accept gaps** (override), or **Abort**
 6. Create `{FEATURE_DIR}/.dod-validate-done` with timestamp and pass/fail verdict
 
-If `speckit.dod.validate` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
+If `speckit.fleet.dod-validate` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
 
 ## Phase 14: Stitch Validate
 
@@ -421,13 +421,13 @@ Validate the implemented UI against the Stitch prototypes produced in Phase 11. 
 ### Execution
 
 1. Auto-skip if `.stitch-prototype-done` does not exist (no prototypes to validate against)
-2. Delegate to `speckit.stitch-implement.validate` with `spec.md`, `plan.md`, and the prototype artifacts as context
+2. Delegate to `speckit.fleet.stitch-validate` with `spec.md`, `plan.md`, and the prototype artifacts as context
 3. The Stitch agent compares the live implementation against the prototype reference
 4. If validation passes, auto-continue to Phase 15 (Code Review)
 5. If validation finds regressions, use `vscode_askQuestions` to choose **Fix now** (loop back to Implement), **Accept differences**, or **Abort**
 6. Create `{FEATURE_DIR}/.stitch-validate-done` with timestamp and validation verdict
 
-If `speckit.stitch-implement.validate` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
+If `speckit.fleet.stitch-validate` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
 
 ## Phase 15: Code Review (with Adversarial Multi-Model Pass)
 
@@ -435,13 +435,13 @@ Skip this phase by passing `--skip-code-review` or setting `phases.skip_code_rev
 
 ### Purpose
 
-Run `speckit.code-quality.pipeline` as the canonical post-implementation quality gate, then optionally run an **adversarial multi-model review pass** inspired by the [Anvil agent](https://github.com/burkeholland/anvil) pattern — dispatching 2-3 code-review subagents in parallel on *different* AI models, each independently reviewing the staged changes for bugs, security holes, logic errors, race conditions, and edge cases. They disagree with each other. That's the point.
+Run `speckit.fleet.quality-pipeline` as the canonical post-implementation quality gate, then optionally run an **adversarial multi-model review pass** inspired by the [Anvil agent](https://github.com/burkeholland/anvil) pattern — dispatching 2-3 code-review subagents in parallel on *different* AI models, each independently reviewing the staged changes for bugs, security holes, logic errors, race conditions, and edge cases. They disagree with each other. That's the point.
 
 ### Canonical Artifacts
 
 Phase 15 writes all review artifacts to `{FEATURE_DIR}/reviews/`:
 
-- `code-review.md` — detailed findings from `speckit.code-quality.pipeline`
+- `code-review.md` — detailed findings from `speckit.fleet.quality-pipeline`
 - `code-fix-report.md` — fixes applied and deferred items
 - `validation-report.md` — FR/NFR validation and coverage gaps
 - `future-ideas.md` — improvement backlog
@@ -450,7 +450,7 @@ Phase 15 writes all review artifacts to `{FEATURE_DIR}/reviews/`:
 
 ### Execution
 
-1. Delegate to `speckit.code-quality.pipeline`
+1. Delegate to `speckit.fleet.quality-pipeline`
 2. Treat `{FEATURE_DIR}/reviews/quality-summary.md` as the primary Phase 15 summary
 3. Treat `{FEATURE_DIR}/reviews/code-review.md` as the detailed findings report for sync, release-readiness, and change-request workflows
 4. **Adversarial multi-model pass** (controlled by `adversarial.enabled` config, default: `true`):
@@ -471,7 +471,7 @@ Controlled by the `adversarial` section in `fleet-config.yml`:
 - `models` — list of models to use (default: `["gpt-4.1", "gemini-2.5-pro", "claude-sonnet-4"]`). Ensure the agent runtime has access to these models.
 - `threshold` — minimum severity to report: `"critical"`, `"high"`, `"medium"`, or `"low"` (default: `"medium"`)
 
-When `adversarial.enabled` is `false`, Phase 15 runs only the `speckit.code-quality.pipeline` (same behavior as before).
+When `adversarial.enabled` is `false`, Phase 15 runs only the `speckit.fleet.quality-pipeline` (same behavior as before).
 
 ### Gate Logic
 

@@ -6,7 +6,7 @@ description: "Generate a human-readable DoD status report summarising coverage, 
 
 Read `dod.yml` and render a comprehensive, human-readable status report to the console (or optionally to a Markdown file). Useful for sprint reviews, PR descriptions, and stakeholder updates.
 
-Unlike `speckit.dod.validate`, this command does **not** re-run any checks — it renders the current state of `dod.yml` as-is. Run `speckit.dod.validate` first to ensure the statuses are current.
+Unlike `speckit.fleet.dod-validate`, this command does **not** re-run any checks — it renders the current state of `dod.yml` as-is. Run `speckit.fleet.dod-validate` first to ensure the statuses are current.
 
 ## User Input
 
@@ -28,7 +28,7 @@ feature_id=$(basename "$feature_dir")
 dod_file="$feature_dir/dod.yml"
 ```
 
-Abort if `dod.yml` does not exist. Instruct the user to run `speckit.dod.generate` first.
+Abort if `dod.yml` does not exist. Instruct the user to run `speckit.fleet.dod-generate` first.
 
 Parse flags from `$ARGUMENTS`:
 - Default `--format` is `console`
@@ -72,7 +72,7 @@ Render the report in the selected format:
 ═══════════════════════════════════════════════════════════════
   DEFINITION OF DONE — <feature_id>
 ═══════════════════════════════════════════════════════════════
-  Last validated: <last_validated_at or "Never — run speckit.dod.validate">
+  Last validated: <last_validated_at or "Never — run speckit.fleet.dod-validate">
   Spec file:      <meta.spec_file>
 
 GATES
@@ -143,6 +143,6 @@ Otherwise: print to console.
 At the end always print:
 ```
 ──────────────────────────────────────────────────────────────
-  To refresh statuses: /speckit.dod.validate
-  To export for CI:    /speckit.dod.export
+  To refresh statuses: /speckit.fleet.dod-validate
+  To export for CI:    /speckit.fleet.dod-export
 ```

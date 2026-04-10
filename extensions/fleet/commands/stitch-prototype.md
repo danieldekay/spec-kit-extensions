@@ -200,9 +200,9 @@ Write `stitch-guide.md` to the feature directory:
 
 ## Quick Reference
 
-To view screens: `/speckit.stitch-implement.ui view`
-To re-generate: `/speckit.stitch-implement.ui regenerate {task-id}`
-To validate: `/speckit.stitch-implement.validate`
+To view screens: `/speckit.fleet.stitch-prototype view`
+To re-generate: `/speckit.fleet.stitch-prototype regenerate {task-id}`
+To validate: `/speckit.fleet.stitch-validate`
 ```
 
 ## Output

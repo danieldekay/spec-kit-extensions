@@ -44,7 +44,7 @@ GATE rules:
 
 <!-- GREP:CQ-PIPELINE-REVIEW -->
 ```
-RUN /speckit.code-quality.review
+RUN /speckit.fleet.code-review
 
 CHECK output:
   - code-review.md exists in reviews/
@@ -59,7 +59,7 @@ GATE:
 
 <!-- GREP:CQ-PIPELINE-FIX -->
 ```
-RUN /speckit.code-quality.fix
+RUN /speckit.fleet.code-fix
 
 CHECK output:
   - code-fix-report.md exists in reviews/
@@ -79,7 +79,7 @@ GATE:
 
 <!-- GREP:CQ-PIPELINE-VALIDATE -->
 ```
-RUN /speckit.code-quality.validate
+RUN /speckit.fleet.validate-requirements
 
 CHECK output:
   - validation-report.md exists in reviews/
@@ -97,7 +97,7 @@ GATE:
 
 <!-- GREP:CQ-PIPELINE-FUTURE -->
 ```
-RUN /speckit.code-quality.future
+RUN /speckit.fleet.future-ideas
 
 CHECK output:
   - future-ideas.md exists in reviews/
@@ -139,12 +139,12 @@ sync_after_pipeline=$(yq eval '.code_quality.specfact.sync_after_pipeline // fal
 If `sync_after_pipeline` is `true` in config:
 ```
 PRINT: "🔗 sync_after_pipeline is enabled — exporting quality findings to specfact..."
-RUN speckit.code-quality.specfact-sync
+RUN speckit.fleet.specfact-sync
 ```
 
 Otherwise:
 ```
-💡 To export all quality findings to specfact, run:  /speckit.code-quality.specfact-sync
+💡 To export all quality findings to specfact, run:  /speckit.fleet.specfact-sync
 ```
 
 ## Artifacts Generated
@@ -155,7 +155,7 @@ All reports saved to: `{feature_dir}/reviews/`
 - `validation-report.md` — FR/NFR traceability, testability, docs
 - `future-ideas.md` — improvement roadmap
 - `quality-summary.md` — this summary
-- `quality-export.json` — specfact-compatible export (when `sync_after_pipeline: true` or `/speckit.code-quality.specfact-sync` is run)
+- `quality-export.json` — specfact-compatible export (when `sync_after_pipeline: true` or `/speckit.fleet.specfact-sync` is run)
 
 ## Next Steps
 

@@ -5,6 +5,30 @@ All notable changes to the `fleet` extension.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] — 2025-07-24
+
+### Added
+
+- Bundled **dod** (4 commands), **codebase-impact** (1), **ux-research** (1), **stitch-implement** (3), **code-quality** (6) as built-in fleet capabilities — one `specify extension add fleet` brings all 20 commands.
+- All 15 sub-commands under `speckit.fleet.*` namespace with short aliases.
+- Merged `config-template.yml`: 6 namespaced sections (`fleet`, `dod`, `codebase_impact`, `ux_research`, `stitch`, `code_quality`).
+- Schemas directory: `dod.schema.json` and `specfact-export.schema.json` bundled in `fleet/schemas/`.
+- Hooks: `after_specify`, `after_plan` (2 hooks), `before_implement`, `after_implement` (3 hooks).
+- Migration guide in README for users upgrading from v0.x separate extensions.
+
+### Changed
+
+- **BREAKING**: `dod`, `codebase-impact`, `ux-research`, `stitch-implement`, and `code-quality` removed as separate extensions.
+- Command namespace migration:
+  - `speckit.dod.*` → `speckit.fleet.dod-*`
+  - `speckit.codebase-impact.*` → `speckit.fleet.codebase-impact-*`
+  - `speckit.ux-research.*` → `speckit.fleet.ux-research-*`
+  - `speckit.stitch-implement.*` → `speckit.fleet.stitch-*`
+  - `speckit.code-quality.*` → `speckit.fleet.*` (quality-pipeline, code-review, etc.)
+- `requires` section no longer lists sub-extension commands; Stitch MCP now optional tool dependency.
+
+---
+
 ## [0.1.0] — 2026-04-09
 
 ### Changed

@@ -15,13 +15,8 @@ This repo provides **opt-in extensions** and **presets** that extend the core Sp
 ```
 spec-kit-extensions/
 ├── extensions/
-│   ├── codebase-impact/     # Codebase interaction analysis (v0.1.0)
-│   ├── code-quality/        # Post-implementation quality pipeline (v0.1.0)
-│   ├── dod/                 # Definition of Done generator (v0.1.0)
-│   ├── fleet/               # Autonomous 14-phase lifecycle orchestrator (v0.1.0)
-│   ├── maqa-github-projects/# GitHub Projects v2 integration (v0.1.0)
-│   ├── stitch-implement/    # Stitch MCP UI prototyping (v0.1.0)
-│   └── ux-research/         # UX research phase for planning (v0.1.0)
+│   ├── fleet/               # All-in-one 17-phase orchestrator (v1.0.0) — bundles DoD, Impact, UX, Stitch, Code Quality
+│   └── maqa-github-projects/# GitHub Projects v2 integration (v0.1.0)
 └── presets/
     └── greppable-templates/ # Greppable markers for spec/tasks/checklist
 ```
@@ -126,13 +121,16 @@ Examples from this repo:
 
 | Full command name | Extension |
 |-------------------|-----------|
-| `speckit.code-quality.pipeline` | code-quality |
-| `speckit.code-quality.specfact-sync` | code-quality |
-| `speckit.dod.generate` | dod |
-| `speckit.dod.validate` | dod |
 | `speckit.fleet.run` | fleet |
-| `speckit.codebase-impact.analyze` | codebase-impact |
-| `speckit.ux-research.analyze` | ux-research |
+| `speckit.fleet.sync` | fleet |
+| `speckit.fleet.change-request` | fleet |
+| `speckit.fleet.dod-generate` | fleet (DoD) |
+| `speckit.fleet.dod-validate` | fleet (DoD) |
+| `speckit.fleet.codebase-impact-analyze` | fleet (Impact) |
+| `speckit.fleet.ux-research-analyze` | fleet (UX) |
+| `speckit.fleet.stitch-prototype` | fleet (Stitch) |
+| `speckit.fleet.quality-pipeline` | fleet (Code Quality) |
+| `speckit.fleet.specfact-sync` | fleet (Code Quality) |
 
 Aliases are allowed and declared in `provides.commands[*].aliases`.
 
@@ -156,28 +154,14 @@ Hooks are declared under `hooks:` in `extension.yml`. The `optional: true` flag 
 
 ## Current Extensions
 
-### `code-quality` — v0.1.0
+### `fleet` — v1.0.0
 
-Post-implementation code quality pipeline. Runs review → fix → validate → future-ideas with gate checks between stages, plus specfact export for CI governance.
+All-in-one 17-phase lifecycle orchestrator. Bundles DoD, Codebase Impact, UX Research, Stitch MCP, and Code Quality as built-in capabilities — one `specify extension add fleet` brings all 20 commands.
 
-Hook: `after_implement`  
-Key commands: `speckit.code-quality.pipeline`, `speckit.code-quality.validate`, `speckit.code-quality.specfact-sync`  
-Integrates with: [specfact.com](https://specfact.com), [`dod` extension](#dod--v100) (optional bridge)
-
-### `dod` — v0.1.0
-
-Generates machine-readable, testable Definitions of Done from `spec.md`. Produces `dod.yml` validated against a JSON Schema, updates criterion statuses after implementation, and exports to specfact-compatible JSON for CI/CD enforcement.
-
-Hooks: `after_specify` (generate), `after_implement` (validate)  
-Key commands: `speckit.dod.generate`, `speckit.dod.validate`, `speckit.dod.export`, `speckit.dod.report`  
-Schemas: `schemas/dod.schema.json` (dod.yml), `schemas/specfact-export.schema.json` (specfact export, format ID: `speckit-dod-export-v1`)
-
-### `fleet` — v0.1.0
-
-Autonomous 14-phase feature lifecycle orchestrator. Runs specify → clarify → plan → ux-research → checklist → tasks → analyze → review → stitch-prototype → implement → stitch-validate → code-review → release-readiness → CI. Auto-resumes from interruptions, only surfaces `vscode_askQuestions` for critical blockers.
-
-Hook: standalone (orchestrates all core hooks internally)  
-Key commands: `speckit.fleet.run`, `speckit.fleet.sync`, `speckit.fleet.change-request`
+Hooks: `after_specify`, `after_plan` (2), `before_implement`, `after_implement` (3)  
+Key commands: `speckit.fleet.run`, `speckit.fleet.sync`, `speckit.fleet.change-request`  
+Bundled capabilities: DoD (4 commands), Codebase Impact (1), UX Research (1), Stitch (3), Code Quality (6)  
+Schemas: `schemas/dod.schema.json`, `schemas/specfact-export.schema.json`
 
 ### `maqa-github-projects` — v0.1.0
 
@@ -185,28 +169,6 @@ GitHub Projects v2 integration. Populates draft issues from specs, moves items a
 
 Hook: standalone  
 Key commands: `speckit.maqa-github-projects.bootstrap`, `speckit.maqa-github-projects.populate`
-
-### `codebase-impact` — v0.1.0
-
-Codebase impact analysis phase. Scans the existing codebase for integration points, affected features, dependency stability, and test impact. Produces `codebase-impact.md` with greppable `IMPACT-NNN` task candidates that feed into `tasks.md`.
-
-Hook: `after_plan`
-Key commands: `speckit.codebase-impact.analyze`
-
-### `stitch-implement` — v0.1.0
-
-Stitch MCP sub-agent for UI prototyping and validation during implementation.
-
-Hooks: `before_implement` / `after_implement`  
-Key commands: `speckit.stitch-implement.prototype`, `speckit.stitch-implement.validate`  
-Requires: Stitch MCP server `>=1.0.0`
-
-### `ux-research` — v0.1.0
-
-Adds a UX research phase to planning. Identifies required UX changes and discovers reusable patterns from the existing tech stack.
-
-Hook: `after_plan`  
-Key commands: `speckit.ux-research.analyze`
 
 ---
 
@@ -253,12 +215,12 @@ All command templates use `<!-- GREP:TAG -->` markers for searchability. Tag pre
 
 | Prefix | Extension |
 |--------|-----------|
-| `GREP:CQ-*` | code-quality |
-| `GREP:DOD-*` | dod |
-| `GREP:FLEET-*` | fleet |
-| `GREP:UXR-*` | ux-research |
-| `GREP:CI-*` | codebase-impact |
-| `GREP:STITCH-*` | stitch-implement |
+| `GREP:FLEET-*` | fleet (orchestrator) |
+| `GREP:CQ-*` | fleet (code-quality) |
+| `GREP:DOD-*` | fleet (dod) |
+| `GREP:UXR-*` | fleet (ux-research) |
+| `GREP:CI-*` | fleet (codebase-impact) |
+| `GREP:STITCH-*` | fleet (stitch) |
 | `GREP:MAQA-*` | maqa-github-projects |
 
 ---
