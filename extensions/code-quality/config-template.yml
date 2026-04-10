@@ -53,3 +53,28 @@ code_quality:
 
     # Include DX (developer experience) improvement ideas
     include_dx: true
+
+  # ─── specfact integration ───────────────────────────────────────────────────
+  specfact:
+    # Project bundle ID from .specfact/projects/<id>/
+    # Leave null to skip automatic specfact export (you can still run dk.code-quality.specfact-sync manually)
+    project_id: null
+
+    # CI enforcement level for the quality gate
+    # observe  → report only, never fails the pipeline
+    # warn     → log warnings, never fails the pipeline
+    # enforce  → fail the pipeline when quality gate thresholds are not met
+    enforcement_level: "observe"
+
+    # Automatically run dk.code-quality.specfact-sync after dk.code-quality.validate
+    sync_after_validate: false
+
+    # Automatically run dk.code-quality.specfact-sync at the end of dk.code-quality.pipeline
+    sync_after_pipeline: false
+
+    # Directory where quality-export.json files are written
+    export_path: ".specfact/quality-exports"
+
+    # When the dod extension is also installed, update dod.yml criterion statuses
+    # using the validation results from dk.code-quality.validate
+    update_dod: true

@@ -208,28 +208,22 @@ Write `ux-research-report.md` to the feature directory:
 ## Recommendations
 
 <!--
-  GREPPABLE FORMAT: each recommendation MUST also appear as a FINDING-NNN line.
-  Format: FINDING-NNN: severity | category | component/location | description
+  GREPPABLE FORMAT: each recommendation MUST also appear as a checkbox item starting with - [ ] FINDING-NNN
+  Format: - [ ] FINDING-NNN: severity | category | component/location | description
   Severity: must-have | should-have | nice-to-have
   Category: ux | a11y | pattern | component | interaction
-  Shell: grep "^FINDING-" ux-research-report.md
+  Shell: grep "\- \[ \] FINDING-" ux-research-report.md
          sk-query.sh findings ux-research-report.md
 -->
 
 ### Must Have (before implementation)
-- [Critical UX decisions needed]
-
-FINDING-001: must-have | ux | [component or location] | [description]
+- [ ] FINDING-001: must-have | ux | [component or location] | [description]
 
 ### Should Have (during implementation)
-- [Important patterns to follow]
-
-FINDING-002: should-have | pattern | [component or location] | [description]
+- [ ] FINDING-002: should-have | pattern | [component or location] | [description]
 
 ### Nice to Have (future iterations)
-- [Improvements for later]
-
-FINDING-003: nice-to-have | ux | [component or location] | [description]
+- [ ] FINDING-003: nice-to-have | ux | [component or location] | [description]
 
 ## Installation Commands
 

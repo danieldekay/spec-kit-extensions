@@ -39,3 +39,35 @@ tags:
   - "project-management"
   - "multi-agent"
   - "maqa"
+
+changelog: "https://github.com/danieldekay/spec-kit-extensions/blob/main/extensions/maqa-github-projects/CHANGELOG.md"
+
+support:
+  issues: "https://github.com/danieldekay/spec-kit-extensions/issues"
+
+config_schema:
+  type: "object"
+  required: ["owner", "project_number", "project_id"]
+  properties:
+    owner:
+      type: "string"
+      description: "GitHub org or username"
+    project_number:
+      type: "string"
+      description: "Project number from the URL"
+    project_id:
+      type: "string"
+      description: "GraphQL node ID (filled by setup)"
+    status_field_id:
+      type: "string"
+    todo_option_id:
+      type: "string"
+    in_progress_option_id:
+      type: "string"
+    in_review_option_id:
+      type: "string"
+    done_option_id:
+      type: "string"
+    linked_repo:
+      type: "string"
+      description: "Optional org/repo to link issues to"

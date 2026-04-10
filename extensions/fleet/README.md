@@ -1,8 +1,8 @@
 # Fleet Orchestrator Extension
 
-Full-lifecycle feature orchestrator for [Spec Kit](https://github.com/danieldekay/spec-kit). Drives a feature from idea to merged code through 12 phases with human-in-the-loop gates at every step.
+Full-lifecycle feature orchestrator for [Spec Kit](https://github.com/danieldekay/spec-kit). Drives a feature from idea to merged code through 14 phases autonomously — auto-resumes, WIP auto-commits after every phase, auto-stashes dirty worktrees, and only interrupts via `vscode_askQuestions` for critical blockers or final ship approval.
 
-Inspired by good ideas from the community: circuit breaker (Ralph), progress.md log (Ralph), machine-readable status tracker (Product Forge), sync-verify (Product Forge), change-request (Product Forge), parallel code-review (MAQA), qa_cadence config (MAQA), explicit --skip-* bypass flags (plan-review-gate).
+Inspired by good ideas from the community: circuit breaker (Ralph), progress.md log (Ralph), machine-readable status tracker (Product Forge), sync-verify (Product Forge), change-request (Product Forge), post-implementation quality pipelines, and explicit --skip-* bypass flags (plan-review-gate).
 
 ## Phases
 
@@ -11,28 +11,34 @@ Inspired by good ideas from the community: circuit breaker (Ralph), progress.md 
 | 1 | Specify | — | `speckit.specify` | `spec.md` |
 | 2 | Clarify | `--skip-clarify` | `speckit.clarify` | `## Clarifications` in spec.md |
 | 3 | Plan | — | `speckit.plan` | `plan.md` |
-| 4 | Checklist | `--skip-checklist` | `speckit.checklist` | `checklists/` |
-| 5 | Tasks | — | `speckit.tasks` | `tasks.md` |
-| 6 | Analyze | — | `speckit.analyze` | `.analyze-done` marker |
-| 7 | Review | `--skip-review` | `speckit.fleet.review` | `review.md` (cross-model) |
-| 8 | Implement | — | `speckit.implement` | all `[x]` in tasks.md |
-| 9 | Code Review | `--skip-code-review` | parallel agents (4) | `.code-review-done` marker |
-| 10 | Verify | `--skip-verify` | `speckit.verify` | `.verify-done` marker |
-| 11 | Release Readiness | `--skip-release` | fleet orchestrator | `release-readiness.md` |
-| 12 | Tests | — | terminal | CI passes |
+| 4 | UX Research | `--skip-ux` (auto-skip if no UI) | `speckit.ux-research.analyze` | `ux-research-report.md` |
+| 5 | Checklist | `--skip-checklist` | `speckit.checklist` | `checklists/` |
+| 6 | Tasks | — | `speckit.tasks` | `tasks.md` |
+| 7 | Analyze | — | `speckit.analyze` | `.analyze-done` marker |
+| 8 | Review | `--skip-review` | `dk.fleet.review` | `review.md` (cross-model) |
+| 9 | Stitch Prototype | `--skip-stitch` (auto-skip if no UI) | `speckit.stitch-implement.prototype` | `.stitch-prototype-done` |
+| 10 | Implement | — | `speckit.implement` | all `[x]` in tasks.md |
+| 11 | Stitch Validate | `--skip-stitch` (auto-skip if no UI) | `speckit.stitch-implement.validate` | `.stitch-validate-done` |
+| 12 | Code Review | `--skip-code-review` | `dk.code-quality.pipeline` | `reviews/quality-summary.md` + `.code-review-done` |
+| 13 | Release Readiness | `--skip-release` | fleet orchestrator | `release-readiness.md` |
+| 14 | Tests | — | terminal | CI passes |
 
 **Key behaviors:**
-- Resumes from the correct phase automatically — run `speckit.fleet.run` on any branch, at any point
-- Human gate (Approve / Revise / Skip / Abort / Rollback) after every phase
-- Parallel subagents (up to 3) during Plan, Implement, and Code Review for `[P]`-marked tasks
+- Resumes from the correct phase automatically — run `dk.fleet.run` on any branch, at any point
+- **Autonomous by default** — uses `vscode_askQuestions` only for critical blockers (FAIL/CRITICAL findings, circuit breaker, missing extensions) and final ship approval (Phase 13)
+- **WIP auto-commits** after every artifact-producing phase (`wip(fleet): phase {N} {name}`), controlled by `git.auto_commit` config
+- **Auto-stashes** uncommitted changes before the run (`git stash push -m "fleet-auto-stash: ..."`) and reminds at completion, controlled by `git.auto_stash` config
+- **Auto-skips Phase 8** when `models.review` is `"ask"` (unconfigured) — no prompting on first run
+- **CI auto-fix** — first iteration auto-fixes without asking; iteration 2+ uses `vscode_askQuestions`
+- Parallel subagents (up to 3) during Plan and Implement for `[P]`-marked tasks
 - **Circuit breaker**: 3 consecutive zero-progress implement batches → halt and ask
-- **`progress.md` log**: timestamped entry after every gate, enables fast resume across sessions
+- **`progress.md` log**: timestamped entry after every completed phase or explicit skip/override decision, enables fast resume across sessions
 - **`.fleet-status.yml` tracker**: machine-readable phase state, powers the sync command
-- Git WIP commits offered after Phases 5, 8, and 10
 - Context budget management with compact summaries between phases
-- Phase 7 uses a *different model* than the rest of the workflow to catch blind spots
-- Phase 9 Code Review uses 4 parallel agents: quality, security, patterns, tests
-- Phase 11 Release Readiness generates a READY / CONDITIONAL / NOT READY checklist
+- Phase 8 uses a *different model* than the rest of the workflow to catch blind spots
+- Phase 12 Code Review runs the full `dk.code-quality.pipeline` and writes canonical reports to `reviews/`
+- Phase 13 Release Readiness generates a READY / CONDITIONAL / NOT READY checklist
+- Phases 4, 9, and 11 auto-skip when the feature has no UI (keyword detection in spec.md/plan.md)
 
 ## Install
 
@@ -45,24 +51,24 @@ specify extension add fleet --from https://github.com/danieldekay/spec-kit-exten
 After installing the extension, run this once to copy the agent files to `.github/agents/`:
 
 ```
-/speckit.fleet.agents-install
+/dk.fleet.agents-install
 ```
 
 Or copy manually:
 ```bash
 mkdir -p .github/agents
-cp .specify/extensions/fleet/agents/speckit.fleet.*.agent.md .github/agents/
+cp .specify/extensions/fleet/agents/dk.fleet.*.agent.md .github/agents/
 ```
 
 ## Commands
 
 | Command | Alias | Description |
 |---------|-------|-------------|
-| `speckit.fleet.run` | `speckit.fleet` | Start or resume the full fleet workflow |
-| `speckit.fleet.review` | — | Cross-model review of design artifacts (invoked by fleet automatically) |
-| `speckit.fleet.agents-install` | — | Install VS Code Copilot agent files to `.github/agents/` |
-| `speckit.fleet.sync` | — | Cross-cutting artifact drift detector (7 consistency layers) |
-| `speckit.fleet.change-request` | — | Formal scope change with CR-NNN tracking and artifact markers |
+| `dk.fleet.run` | `dk.fleet` | Start or resume the full fleet workflow |
+| `dk.fleet.review` | — | Cross-model review of design artifacts (invoked by fleet automatically) |
+| `dk.fleet.agents-install` | — | Install VS Code Copilot agent files to `.github/agents/` |
+| `dk.fleet.sync` | — | Cross-cutting artifact drift detector (7 consistency layers) |
+| `dk.fleet.change-request` | — | Formal scope change with CR-NNN tracking and artifact markers |
 
 ## Configuration
 
@@ -86,22 +92,26 @@ Key settings:
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `models.primary` | `"auto"` | Model for most phases |
-| `models.review` | `"ask"` | Model for Phase 7 (cross-model review) — prompted once, then saved |
+| `models.review` | `"ask"` | Model for Phase 8 (cross-model review) — auto-skips when `"ask"`, set a model name to enable |
 | `phases.skip_clarify` | `false` | Skip Phase 2 entirely |
-| `phases.skip_checklist` | `false` | Skip Phase 4 entirely |
-| `phases.skip_review` | `false` | Skip Phase 7 entirely |
-| `phases.skip_code_review` | `false` | Skip Phase 9 entirely |
-| `phases.skip_verify` | `false` | Skip Phase 10 entirely |
-| `phases.skip_release` | `false` | Skip Phase 11 entirely |
-| `qa.cadence` | `"per_phase"` | When to run code review: `per_phase` or `batch_end` |
-| `qa.security` | `true` | Enable security dimension in Phase 9 code review |
-| `qa.code_quality` | `true` | Enable quality dimension in Phase 9 code review |
-| `qa.patterns` | `true` | Enable patterns dimension in Phase 9 code review |
-| `qa.tests` | `true` | Enable test coverage dimension in Phase 9 code review |
+| `phases.skip_ux` | `false` | Skip Phase 4 entirely (auto-skips if no UI detected) |
+| `phases.skip_checklist` | `false` | Skip Phase 5 entirely |
+| `phases.skip_review` | `false` | Skip Phase 8 entirely |
+| `phases.skip_stitch` | `false` | Skip Phases 9+11 entirely (auto-skips if no UI detected) |
+| `phases.skip_code_review` | `false` | Skip Phase 12 entirely |
+| `phases.skip_release` | `false` | Skip Phase 13 entirely |
+| `qa.cadence` | `"per_phase"` | When to run the Phase 12 code-quality pipeline: `per_phase` or `batch_end` |
+| `qa.run_review` | `true` | Generate `reviews/code-review.md` |
+| `qa.run_fix` | `true` | Apply auto-fixes and generate `reviews/code-fix-report.md` |
+| `qa.run_validate` | `true` | Generate `reviews/validation-report.md` |
+| `qa.run_future` | `true` | Generate `reviews/future-ideas.md` |
+| `qa.pause_on_critical` | `true` | Pause Fleet if CRITICAL findings remain after Phase 12 |
+| `git.auto_commit` | `true` | WIP auto-commit after every artifact-producing phase |
+| `git.auto_stash` | `true` | Auto-stash uncommitted changes before fleet run |
 | `parallelism.max_concurrent` | `3` | Max concurrent subagents |
 
 ## Requires
 
 - `speckit >= 0.2.0`
 - Core SpecKit commands: `speckit.specify`, `speckit.clarify`, `speckit.plan`, `speckit.checklist`, `speckit.tasks`, `speckit.analyze`, `speckit.implement`
-- Optional: `speckit.verify` from the [verify extension](https://github.com/ismaelJimenez/spec-kit-verify) (Phase 10)
+- Recommended companion extensions for the full Fleet experience: `ux-research`, `stitch-implement`, `code-quality`

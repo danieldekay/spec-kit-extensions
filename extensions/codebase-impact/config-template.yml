@@ -1,0 +1,36 @@
+# Codebase impact analysis configuration
+# Override defaults per-project
+
+codebase_impact:
+  # Depth of codebase scan: "full" | "shallow" | "targeted"
+  #   full     — scan entire repo except excluded directories
+  #   shallow  — scan only directories referenced in plan.md project structure
+  #   targeted — scan only directories listed in scan_directories
+  scan_depth: "full"
+
+  # Directories to scan (relative to repo root)
+  # Only used when scan_depth is "targeted"; ignored otherwise
+  scan_directories: []
+
+  # Directories to skip during scanning
+  exclude_directories:
+    - "node_modules"
+    - ".git"
+    - "dist"
+    - "build"
+    - ".specify"
+    - "vendor"
+    - "__pycache__"
+    - ".venv"
+
+  # Minimum risk level to include: "LOW" | "MED" | "HIGH"
+  risk_threshold: "LOW"
+
+  # Include existing test files that need updates
+  include_test_impact: true
+
+  # Include dependency stability audit (uses git log to assess churn)
+  include_dependency_stability: true
+
+  # Output format: "markdown" | "json"
+  output_format: "markdown"

@@ -15,10 +15,10 @@ specify extension add stitch-implement --source ./extensions/stitch-implement
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `speckit.stitch-implement.prototype` | Generate UI screens and extract code patterns |
-| `speckit.stitch-implement.validate` | Validate implementation against prototypes |
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `speckit.stitch-implement.prototype` | `speckit.stitch-implement.ui` | Generate UI screens and extract code patterns |
+| `speckit.stitch-implement.validate` | — | Validate implementation against prototypes |
 
 ## Modes
 

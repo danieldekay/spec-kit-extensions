@@ -211,3 +211,80 @@ Write `validation-report.md` to `{feature_dir}/reviews/`:
 ## Output
 
 Produces `{feature_dir}/reviews/validation-report.md` with comprehensive requirement traceability.
+
+---
+
+### Step 7: Bridge to dod.yml (if dod extension installed)
+
+<!-- GREP:CQ-VALIDATE-DOD-BRIDGE -->
+
+If the `dod` extension is also active in this workspace, propagate the validation results back into `dod.yml` so both extensions share a single source of truth.
+
+```bash
+config_file=".specify/extensions/code-quality/code-quality-config.yml"
+update_dod=$(yq eval '.code_quality.specfact.update_dod // true' "$config_file" 2>/dev/null || echo "true")
+dod_file="$feature_dir/dod.yml"
+
+if [[ "$update_dod" == "true" ]] && [[ -f "$dod_file" ]]; then
+  echo "📎 dod.yml found — bridging validation results..."
+else
+  echo "ℹ️  Skipping dod.yml bridge (not installed or update_dod: false)"
+fi
+```
+
+When `update_dod` is true and `dod.yml` exists:
+
+```
+FOR each FR in validation-report.md:
+  FIND the matching FR ID in dod.yml.functional_requirements
+
+  IF FR status is ✅ IMPLEMENTED:
+    FOR each criterion in dod.yml FR that has evidence.test_files non-empty:
+      SET criterion.status: "passed"    (only if not already "failed")
+    COMPUTE FR aggregate status
+
+  IF FR status is ❌ MISSING:
+    FOR each criterion in dod.yml FR:
+      IF criterion.status is "pending":
+        SET criterion.status: "failed"
+        APPEND evidence.notes: "Not implemented per dk.code-quality.validate"
+
+  IF FR status is ⚠️ PARTIAL:
+    Leave criterion statuses as-is; append a note to FR.implementation.status_note
+
+FOR each NFR in validation-report.md:
+  FIND the matching NFR ID in dod.yml.non_functional_requirements
+
+  IF NFR has evidence (e.g. measured value):
+    SET matching NFR criterion evidence.result and evidence.measured_at
+    IF measured value passes the threshold operator:
+      SET criterion.status: "passed"
+    ELSE:
+      SET criterion.status: "failed"
+
+UPDATE dod.yml gates:
+  Re-evaluate ready_for_sprint and definition_of_done based on new statuses
+  SET meta.last_validated_at to current timestamp
+
+PRINT: "✅ dod.yml updated from validation results"
+```
+
+### Step 8: specfact Export (conditional)
+
+<!-- GREP:CQ-VALIDATE-SF-EXPORT -->
+
+```bash
+sync_after_validate=$(yq eval '.code_quality.specfact.sync_after_validate // false' "$config_file" 2>/dev/null || echo "false")
+```
+
+If `sync_after_validate` is `true` in config:
+```
+PRINT: "🔗 sync_after_validate is enabled — running dk.code-quality.specfact-sync..."
+RUN dk.code-quality.specfact-sync
+```
+
+Otherwise:
+```
+💡 To push quality results to specfact:  /dk.code-quality.specfact-sync
+💡 To update DoD enforcement gate:       /dk.dod.export  (if dod extension is installed)
+```

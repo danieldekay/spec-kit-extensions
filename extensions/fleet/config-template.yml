@@ -25,48 +25,60 @@ fleet:
     # Skip Phase 2 (Clarify) automatically — or pass --skip-clarify at runtime
     skip_clarify: false
 
-    # Skip Phase 4 (Checklist) automatically — or pass --skip-checklist at runtime
+    # Skip Phase 4 (UX Research) automatically — or pass --skip-ux at runtime
+    # Auto-skips when spec.md/plan.md contain no UI keywords
+    skip_ux: false
+
+    # Skip Phase 5 (Checklist) automatically — or pass --skip-checklist at runtime
     skip_checklist: false
 
-    # Skip Phase 7 (Cross-model review) automatically — or pass --skip-review at runtime
+    # Skip Phase 8 (Cross-model review) automatically — or pass --skip-review at runtime
     skip_review: false
 
-    # Skip Phase 9 (Code Review) automatically — or pass --skip-code-review at runtime
+    # Skip Phases 9+11 (Stitch Prototype/Validate) automatically — or pass --skip-stitch at runtime
+    # Auto-skips when spec.md/plan.md contain no UI keywords
+    skip_stitch: false
+
+    # Skip Phase 12 (Code Review) automatically — or pass --skip-code-review at runtime
     skip_code_review: false
 
-    # Skip Phase 10 (Verify) automatically — or pass --skip-verify at runtime
-    skip_verify: false
-
-    # Skip Phase 11 (Release Readiness) automatically — or pass --skip-release at runtime
+    # Skip Phase 13 (Release Readiness) automatically — or pass --skip-release at runtime
     skip_release: false
 
   qa:
-    # When to run the 4-agent code review batch
-    #   per_phase: immediately after Phase 8 (Implement) — default
+    # When to run the Phase 12 code-quality pipeline
+    #   per_phase: immediately after Phase 10 (Implement) — default
     #   batch_end: run once at the end of all implementation batches
     cadence: "per_phase"
 
-    # Toggle individual code review dimensions (Phase 9)
-    security: true       # OWASP Top 10 scoped to plan.md surfaces
-    code_quality: true   # Naming, complexity, duplication, error handling
-    patterns: true       # SOLID, codebase conventions from Phase 6 Analyze
-    tests: true          # Coverage gaps vs tasks.md acceptance criteria
+    # Toggle individual code-quality pipeline stages (Phase 12)
+    run_review: true     # Generate reviews/code-review.md
+    run_fix: true        # Apply auto-fixes and generate reviews/code-fix-report.md
+    run_validate: true   # Generate reviews/validation-report.md
+    run_future: true     # Generate reviews/future-ideas.md
+
+    # Pause Fleet if the pipeline leaves unresolved CRITICAL findings
+    pause_on_critical: true
 
   git:
-    # Offer a WIP commit after Phase 5 (Tasks), 8 (Implement), 10 (Verify)
+    # Legacy: WIP commit checkpoints (superseded by auto_commit)
     checkpoint_after_tasks: true
     checkpoint_after_implement: true
-    checkpoint_after_verify: true
 
-    # Never auto-commit without asking (always false)
-    auto_commit: false
+    # Auto-commit WIP after every artifact-producing phase (default: true)
+    # When false, falls back to asking via vscode_askQuestions after Phases 6 and 10 only
+    auto_commit: true
+
+    # Auto-stash uncommitted changes before fleet run (default: true)
+    # When false, uses vscode_askQuestions to ask Continue / Stash / Abort
+    auto_stash: true
 
   context:
     # Summarize and discard full sub-agent output after each approved gate
     compact_after_phase: true
 
     # Suggest a fresh chat starting at this phase number (to avoid context exhaustion)
-    suggest_fresh_chat_at_phase: 5
+    suggest_fresh_chat_at_phase: 6
 
   parallelism:
     # Maximum number of concurrent subagents during Plan, Implement, and Code Review phases

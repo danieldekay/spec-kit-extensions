@@ -2,29 +2,36 @@
 description: 'Autonomous 14-phase feature lifecycle orchestrator (dk + SpecKit).
    Auto-resumes, WIP auto-commits after every phase, auto-stashes dirty worktrees,
    and only interrupts via vscode_askQuestions for critical blockers or final ship
-   approval: specify -> clarify (opt) -> plan -> ux-research (opt) -> checklist
-   (opt) -> tasks -> analyze -> review (opt) -> stitch-prototype (opt) -> implement
-   -> stitch-validate (opt) -> code-review (opt) -> release-readiness (opt) -> CI.
-   Detects partially complete features and resumes from the right phase.'
+   approval: specify -> clarify (opt) -> plan -> ux-research (opt, auto-skip if no UI)
+   -> checklist (opt) -> tasks -> analyze -> review (opt) -> stitch-prototype
+   (opt, auto-skip if no UI) -> implement -> stitch-validate (opt, auto-skip if no UI)
+   -> code-review (opt) -> release-readiness (opt) -> CI. Detects partially complete
+   features and resumes from the right phase.'
+canonical: no
+tools:
+- vscode_askQuestions
 scripts:
-  sh: scripts/bash/check-prerequisites.sh --json --paths-only
-  ps: scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
+  sh: .specify/scripts/bash/check-prerequisites.sh --json --paths-only
+  ps: .specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
 agents:
-  - speckit.specify
-  - speckit.clarify
-  - speckit.plan
-  - speckit.ux-research.analyze
-  - speckit.checklist
-  - speckit.tasks
-  - speckit.analyze
-  - dk.fleet.review
-  - speckit.stitch-implement.prototype
-  - speckit.implement
-  - speckit.stitch-implement.validate
+- speckit.specify
+- speckit.clarify
+- speckit.plan
+- speckit.ux-research.analyze
+- speckit.checklist
+- speckit.tasks
+- speckit.analyze
+- dk.fleet.review
+- speckit.stitch-implement.prototype
+- speckit.implement
+- speckit.stitch-implement.validate
 user-invocable: true
 disable-model-invocation: true
 ---
 
+
+<!-- Extension: fleet -->
+<!-- Config: .specify/extensions/fleet/ -->
 ## User Input
 
 ```text
@@ -35,7 +42,7 @@ You **MUST** consider the user input before proceeding (if not empty). Classify 
 
 1. **Feature description** (e.g., "Build a capability browser that lets users..."): Store as `FEATURE_DESCRIPTION`. This will be passed verbatim to `speckit.specify` in Phase 1. Skip artifact detection if no `FEATURE_DIR` is found -- go straight to Phase 1.
 2. **Phase override** (e.g., "resume at Phase 5" or "start from plan"): Override the auto-detected resume point.
-3. **Skip flags** (`--skip-clarify`, `--skip-ux`, `--skip-checklist`, `--skip-review`, `--skip-stitch`, `--skip-code-review`, `--skip-release`): Mark the named phase(s) as permanently skipped for this run. Store the set as `SKIP_PHASES`. Config defaults (`phases.skip_*: true`) have the same effect and are checked if no CLI flag is provided.
+3. **Skip flags** (`--skip-clarify`, `--skip-checklist`, `--skip-review`, `--skip-code-review`, `--skip-release`, `--skip-ux`, `--skip-stitch`): Mark the named phase(s) as skipped for this run.
 4. **Empty**: Run artifact detection and resume from the detected phase.
 
 ---
@@ -44,22 +51,22 @@ You are the **SpecKit Fleet Orchestrator** -- an autonomous workflow conductor t
 
 ## Workflow Phases
 
-| Phase | Optional | Agent | Artifact Signal | Hard Gate |
-|-------|----------|-------|-----------------|-----------|
-| 1. Specify | — | `speckit.specify` | `spec.md` exists in FEATURE_DIR | Start/resume confirmation only |
-| 2. Clarify | `--skip-clarify` | `speckit.clarify` | `spec.md` contains a `## Clarifications` section | Ask only if unresolved questions remain |
-| 3. Plan | — | `speckit.plan` | `plan.md` exists in FEATURE_DIR | Auto-continue |
-| 4. UX Research | `--skip-ux` | `speckit.ux-research.analyze` | `ux-research-report.md` exists in FEATURE_DIR | Auto-skip if feature has no UI; auto-continue otherwise |
-| 5. Checklist | `--skip-checklist` | `speckit.checklist` | `checklists/` directory exists and contains at least one file | Auto-continue |
-| 6. Tasks | — | `speckit.tasks` | `tasks.md` exists in FEATURE_DIR | Checkpoint commit approval only |
-| 7. Analyze | — | `speckit.analyze` | `.analyze-done` marker exists in FEATURE_DIR | Auto-continue |
-| 8. Review | `--skip-review` | `dk.fleet.review` | `review.md` exists in FEATURE_DIR | Ask only for FAIL findings, override, or skip |
-| 9. Stitch Prototype | `--skip-stitch` | `speckit.stitch-implement.prototype` | `.stitch-prototype-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; auto-continue otherwise |
-| 10. Implement | — | `speckit.implement` | ALL task checkboxes in tasks.md are `[x]` (none `[ ]`) | Ask only on blockers or circuit breaker |
-| 11. Stitch Validate | `--skip-stitch` | `speckit.stitch-implement.validate` | `.stitch-validate-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; ask only for validation failures |
-| 12. Code Review | `--skip-code-review` | `dk.code-quality.pipeline` | `.code-review-done` marker exists in FEATURE_DIR | Ask only if unresolved critical findings remain |
-| 13. Release Readiness | `--skip-release` | Fleet orchestrator | `release-readiness.md` exists in FEATURE_DIR | Final ship/readiness approval |
-| 14. Tests | — | Terminal | Tests pass | Ask only if CI remediation choice is needed |
+| Phase | Agent | Artifact Signal | Hard Gate |
+|-------|-------|-----------------|-----------|
+| 1. Specify | `speckit.specify` | `spec.md` exists in FEATURE_DIR | Start/resume confirmation only |
+| 2. Clarify | `speckit.clarify` | `spec.md` contains a `## Clarifications` section | Ask only if unresolved questions remain |
+| 3. Plan | `speckit.plan` | `plan.md` exists in FEATURE_DIR | Auto-continue |
+| 4. UX Research | `speckit.ux-research.analyze` | `ux-research-report.md` exists in FEATURE_DIR | Auto-skip if feature has no UI; auto-continue otherwise |
+| 5. Checklist | `speckit.checklist` | `checklists/` directory exists and contains at least one file | Auto-continue |
+| 6. Tasks | `speckit.tasks` | `tasks.md` exists in FEATURE_DIR | Checkpoint commit approval only |
+| 7. Analyze | `speckit.analyze` | `.analyze-done` marker exists in FEATURE_DIR | Auto-continue |
+| 8. Review | `dk.fleet.review` | `review.md` exists in FEATURE_DIR | Ask only for FAIL findings, override, or skip |
+| 9. Stitch Prototype | `speckit.stitch-implement.prototype` | `.stitch-prototype-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; auto-continue otherwise |
+| 10. Implement | `speckit.implement` | ALL task checkboxes in tasks.md are `[x]` (none `[ ]`) | Ask only on blockers or circuit breaker |
+| 11. Stitch Validate | `speckit.stitch-implement.validate` | `.stitch-validate-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; ask only for validation failures |
+| 12. Code Review | `dk.code-quality.pipeline` | `.code-review-done` marker exists in FEATURE_DIR | Ask only if unresolved critical findings remain |
+| 13. Release Readiness | Fleet orchestrator | `release-readiness.md` exists in FEATURE_DIR | Final ship/readiness approval |
+| 14. Tests | Terminal | Tests pass | Ask only if CI remediation choice is needed |
 
 ## Operating Rules
 
@@ -69,9 +76,13 @@ You are the **SpecKit Fleet Orchestrator** -- an autonomous workflow conductor t
    ALL other phases auto-continue — including start/resume, git commits, clarify, checklist, analyze, and auto-skippable phases. Never stop between phases to "confirm" or "approve" unless one of the two conditions above is met.
    **CRITICAL: When a hard gate requires human input, ALWAYS use the `vscode_askQuestions` tool with structured options. Never present choices as markdown bullet lists, numbered menus, or plain-text prompts.**
 2. **Clarify is repeatable.** If `speckit.clarify` finds unresolved questions, use `vscode_askQuestions` to get answers, otherwise auto-advance.
-3. **Companion extensions.** UX Research (Phase 4), Stitch (Phases 9 & 11), and Code Quality (Phase 12) are formal phases that auto-skip gracefully when their extension is missing or the feature has no UI.
+3. **Comprehensive Extensions.** UX Research, Stitch, and Code Quality are formal phases (4, 9, 11, 12) with their own artifact signals, skip flags, and auto-skip logic:
    - **Before resuming:** Audit whether `speckit.ux-research.analyze`, `speckit.stitch-implement.prototype`, `speckit.stitch-implement.validate`, and `dk.code-quality.pipeline` are available. If a companion command is missing, use `vscode_askQuestions` to offer install, skip the affected phase, or continue in degraded mode.
-   - **UI detection:** Scan `spec.md` and `plan.md` for UI-related keywords (component, page, screen, layout, form, modal, button, dialog, UI, UX, frontend, view, template, style, CSS, HTML, design). If none are found, auto-skip Phases 4, 9, and 11 without prompting.
+   - **UI detection (Phases 4, 9, 11):** Scan `spec.md` and `plan.md` for UI-related keywords (component, page, screen, layout, form, modal, button, dialog, UI, UX, frontend, view, template, style, CSS, HTML, design). If **none** are found, auto-skip Phases 4, 9, and 11 silently — log "Auto-skipped: no UI detected" in `progress.md`.
+   - **Phase 4 (UX Research):** Delegate to `speckit.ux-research.analyze` after Plan. Produces `ux-research-report.md`.
+   - **Phase 9 (Stitch Prototype):** Delegate to `speckit.stitch-implement.prototype` before Implement. Produces `.stitch-prototype-done`.
+   - **Phase 11 (Stitch Validate):** Delegate to `speckit.stitch-implement.validate` after Implement. Produces `.stitch-validate-done`.
+   - **Phase 12 (Code Review):** Run the complete `dk.code-quality.pipeline` (review → fix → validate → future ideas) instead of standard review agents.
 4. **Track progress.** Use the todo tool to create and update a checklist of all 14 phases so the user always sees where they are.
 5. **Pass context forward -- compactly.** When delegating, include only a **structured context summary** -- not the full output of previous phases. The summary should contain:
    - Feature description (1-2 sentences)
@@ -93,16 +104,16 @@ You are the **SpecKit Fleet Orchestrator** -- an autonomous workflow conductor t
    - **On failure** (nothing to commit, git error): log silently and continue — never halt the workflow for a failed WIP commit
    - Controlled by `git.auto_commit` config (default: `true`). When `false`, falls back to asking via `vscode_askQuestions` after Phases 6 and 10 only.
 9. **Context budget awareness.** Long-running fleet sessions can exhaust the model's context window. Actively manage context:
-      - **After every completed phase**, summarize the outcome in 1-2 sentences and discard the full sub-agent output from working memory (see Rule 5).
+    - **After every completed phase**, summarize the completed phase in 1-2 sentences and discard the full sub-agent output from working memory (see Rule 5).
     - **Starting at Phase 5**, proactively assess context pressure. If the session started from Phase 1, suggest: *"We've completed 5 phases in this session. We can continue, or start a fresh chat -- the fleet will auto-detect progress and resume at Phase {N}."*
     - **Monitor for degradation signs**: Responses becoming shorter, losing earlier context, or repeating questions already answered.
-    - At any natural checkpoint, if context pressure seems high, suggest a fresh chat.
-   10. **`vscode_askQuestions` format.** Every hard-gate interaction MUST use the `vscode_askQuestions` tool with structured options. Rules:
+    - At any natural checkpoint (after git commits or between phases), if context pressure seems high, suggest a fresh chat.
+10. **`vscode_askQuestions` format.** Every hard-gate interaction MUST use the `vscode_askQuestions` tool with structured options. Rules:
        - Provide concrete `options` with `label` strings — never leave choices as free text
        - Set `allowFreeformInput: false` unless the question genuinely needs a typed answer
        - One `vscode_askQuestions` call per decision — never batch multiple decisions into one call
        - Mark the recommended option with `recommended: true`
-   11. **Continue unless blocked.** Every orchestrator turn that is not a sub-agent delegation should either auto-transition to the next phase or present exactly one `vscode_askQuestions` prompt for a hard gate.
+11. **Continue unless blocked.** Every orchestrator turn that is not a sub-agent delegation should either auto-transition to the next phase or present exactly one `vscode_askQuestions` prompt for a hard gate.
 12. **Circuit breaker (Phase 10).** Track consecutive implementation batches where no task checkbox advances from `[ ]` to `[x]`. After 3 consecutive zero-progress batches, halt and present:
     > CIRCUIT BREAKER: 3 consecutive batches completed with no task progress. The agent appears stuck.
     > - **Continue** — reset the counter and retry
@@ -131,7 +142,7 @@ You are the **SpecKit Fleet Orchestrator** -- an autonomous workflow conductor t
 
 ## Parallel Subagent Execution (Plan & Implement Phases)
 
-During **Phase 3 (Plan)** and **Phase 10 (Implement)**, the orchestrator may dispatch **up to 3 subagents in parallel** when work items are independent. This is governed by the `[P]` (parallelizable) marker system used in tasks.md.
+During **Phase 3 (Plan)** and **Phase 10 (Implement)**, the orchestrator may dispatch **up to 3 subagents in parallel** when work items are independent. This is governed by the `[P]` (parallelizable) marker system already used in tasks.md.
 
 ### How Parallelism Works
 
@@ -152,29 +163,49 @@ During **Phase 3 (Plan)** and **Phase 10 (Implement)**, the orchestrator may dis
 
 ### Parallel Groups in tasks.md
 
-The tasks agent should organize `[P]` tasks into explicit parallel groups using comments:
+The tasks agent should organize `[P]` tasks into explicit parallel groups using comments in tasks.md:
 
 ```markdown
 ### Phase 1: Setup
 
 <!-- parallel-group: 1 (max 3 concurrent) -->
-- TASK-T002: [ ] [P] Create CapabilityManifest.cs in Models/Generation/
-- TASK-T003: [ ] [P] Create DocumentIndex.cs in Models/Generation/
-- TASK-T004: [ ] [P] Create ResolvedContext.cs in Models/Generation/
+- [ ] T002 [P] Create CapabilityManifest.cs in Models/Generation/
+- [ ] T003 [P] Create DocumentIndex.cs in Models/Generation/
+- [ ] T004 [P] Create ResolvedContext.cs in Models/Generation/
+
+<!-- parallel-group: 2 (max 3 concurrent) -->
+- [ ] T005 [P] Create GenerationResult.cs in Models/Generation/
+- [ ] T006 [P] Create BatchGenerationJob.cs in Models/Generation/
+- [ ] T007 [P] Create SchemaExport.cs in Models/Generation/
 
 <!-- sequential -->
-- TASK-T013: [ ] Create generation.ts with all TypeScript interfaces
+- [ ] T013 Create generation.ts with all TypeScript interfaces
 ```
+
+### Plan Phase Parallelism
+
+During Phase 3 (Plan), the plan agent's Phase 0 (Research) can dispatch up to 3 research sub-tasks in parallel:
+- Each `NEEDS CLARIFICATION` item or technology best-practice lookup is an independent research task
+- Fan out up to 3 at a time, consolidate results into research.md
+- Phase 1 (Design) artifacts -- data-model.md, contracts/, quickstart.md -- can be generated in parallel if they don't depend on each other's output
+
+### Implement Phase Parallelism
+
+During Phase 10 (Implement), for each implementation phase in tasks.md:
+1. Read the phase and identify parallel groups (marked with `<!-- parallel-group: N -->` comments)
+2. For each group, dispatch up to 3 `speckit.implement` subagents simultaneously, each given a specific subset of tasks
+3. When all tasks in a group complete, move to the next group or sequential task
+4. After the entire phase completes, checkpoint with the user before proceeding to the next phase
 
 ### Instructions for Tasks Agent
 
 When the fleet orchestrator delegates to `speckit.tasks`, append this instruction:
 
-> "Organize [P]-marked tasks into explicit parallel groups using `<!-- parallel-group: N -->` HTML comments. Each group should contain up to 3 tasks that can execute concurrently (different files, no dependencies). Add `<!-- sequential -->` before tasks that must run in order."
+> "Organize [P]-marked tasks into explicit parallel groups using `<!-- parallel-group: N -->` HTML comments. Each group should contain up to 3 tasks that can execute concurrently (different files, no dependencies). Add `<!-- sequential -->` before tasks that must run in order. This enables the fleet orchestrator to fan out up to 3 subagents per group during implementation."
 
 ## First-Turn Behavior -- Artifact Detection & Resume
 
-On **every** invocation, before doing anything else, run artifact detection to determine where the workflow stands.
+On **every** invocation, before doing anything else, run artifact detection to determine where the workflow stands. This allows the orchestrator to resume mid-flight even in a fresh conversation.
 
 ### Step 0: Branch safety pre-flight
 
@@ -192,6 +223,8 @@ Before anything else, run basic git health checks:
 
 3. **Branch freshness** (advisory): Run `git log --oneline HEAD..origin/main 2>/dev/null | wc -l`. If the main branch has commits not in the current branch, advise:
    > Your branch is {N} commits behind main. Consider rebasing before starting implementation to avoid merge conflicts later.
+
+This check runs only once on first invocation. It does NOT block the workflow (except for detached HEAD).
 
 ### Step 1: Discover the feature directory
 
@@ -211,95 +244,106 @@ This keeps the fleet fully autonomous on first run. Users who want cross-model r
 
 ### Step 3: Probe artifacts in FEATURE_DIR
 
-Check these paths **in order**:
+Check these paths **in order** using the `read` tool. Each check is a file/directory existence AND basic integrity test:
 
 | Check | Path | Existence | Integrity |
 |-------|------|-----------|-----------|
-| spec.md | `{FEATURE_DIR}/spec.md` | File exists? | Has `## User Stories` or `## Requirements`? File > 100 bytes? |
-| Clarifications | `{FEATURE_DIR}/spec.md` | Contains `## Clarifications`? | At least one Q&A pair? |
-| plan.md | `{FEATURE_DIR}/plan.md` | File exists? | Has `## Architecture` or `## Tech Stack`? File > 200 bytes? |
-| UX research | `{FEATURE_DIR}/ux-research-report.md` | File exists? | -- |
-| checklists/ | `{FEATURE_DIR}/checklists/` | Directory exists with >=1 file? | Each file > 50 bytes? |
-| tasks.md | `{FEATURE_DIR}/tasks.md` | File exists? | Contains `- [ ]` or `- [x]`? Has `### Phase` heading? |
+| spec.md | `{FEATURE_DIR}/spec.md` | File exists? | Has `## User Stories` or `## Requirements` section? File > 100 bytes? |
+| Clarifications | `{FEATURE_DIR}/spec.md` | Contains `## Clarifications` heading? | At least one Q&A pair present? |
+| plan.md | `{FEATURE_DIR}/plan.md` | File exists? | Has `## Architecture` or `## Tech Stack` section? File > 200 bytes? |
+| ux-research-report.md | `{FEATURE_DIR}/ux-research-report.md` | File exists? | Has `## Findings` or `## Recommendations` section? |
+| checklists/ | `{FEATURE_DIR}/checklists/` | Directory exists and has >=1 file? | Each file > 50 bytes? |
+| tasks.md | `{FEATURE_DIR}/tasks.md` | File exists? | Contains at least one `- [ ]` or `- [x]` item? Has `### Phase` heading? |
 | .analyze-done | `{FEATURE_DIR}/.analyze-done` | Marker file exists? | -- |
 | review.md | `{FEATURE_DIR}/review.md` | File exists? | Contains `## Summary` and verdict table? |
-| Stitch prototype | `{FEATURE_DIR}/.stitch-prototype-done` | Marker file exists? | -- |
+| .stitch-prototype-done | `{FEATURE_DIR}/.stitch-prototype-done` | Marker file exists? | -- |
 | Implementation | `{FEATURE_DIR}/tasks.md` | All `- [x]`, zero `- [ ]` remaining? | -- |
-| Stitch validate | `{FEATURE_DIR}/.stitch-validate-done` | Marker file exists? | -- |
-| Code review | `{FEATURE_DIR}/.code-review-done` | Marker file exists? | -- |
-| Release readiness | `{FEATURE_DIR}/release-readiness.md` | File exists? | Contains a `## Status` with READY / CONDITIONAL / NOT READY verdict? |
+| .stitch-validate-done | `{FEATURE_DIR}/.stitch-validate-done` | Marker file exists? | -- |
 
-**Integrity failures are advisory, not blocking.** Warn the user if a file exists but fails integrity checks.
+**Integrity failures are advisory, not blocking.** If a file exists but fails integrity checks, warn the user:
+> WARNING: `plan.md` exists but appears incomplete (missing expected sections). It may have been partially generated. Re-run Phase 3 (Plan), or continue with the current file?
 
 ### Step 4: Determine the resume phase
 
+Walk the artifact signals **top-down**. The first phase whose artifact is **missing** is where work resumes:
+
 ```
-if spec.md missing                     -> Phase 1  (Specify)
-if no ## Clarifications                 -> Phase 2  (Clarify)             [skip if in SKIP_PHASES]
-if plan.md missing                     -> Phase 3  (Plan)
-if ux-research-report.md missing       -> Phase 4  (UX Research)         [skip if in SKIP_PHASES or no UI]
-if checklists/ empty/missing           -> Phase 5  (Checklist)           [skip if in SKIP_PHASES]
-if tasks.md missing                    -> Phase 6  (Tasks)
-if .analyze-done missing               -> Phase 7  (Analyze)
-if review.md missing                   -> Phase 8  (Review)              [skip if in SKIP_PHASES]
-if .stitch-prototype-done missing      -> Phase 9  (Stitch Prototype)    [skip if in SKIP_PHASES or no UI]
-if tasks.md has `- [ ]`               -> Phase 10 (Implement)
-if .stitch-validate-done missing       -> Phase 11 (Stitch Validate)     [skip if in SKIP_PHASES or no UI]
-if .code-review-done missing           -> Phase 12 (Code Review)         [skip if in SKIP_PHASES]
-if release-readiness.md missing        -> Phase 13 (Release Readiness)   [skip if in SKIP_PHASES]
-if all done                            -> Phase 14 (Tests)
+if spec.md missing                    -> resume at Phase 1 (Specify)
+if no ## Clarifications                -> resume at Phase 2 (Clarify)
+if plan.md missing                    -> resume at Phase 3 (Plan)
+if ux-research-report.md missing       -> resume at Phase 4 (UX Research) [auto-skip if no UI]
+if checklists/ empty/missing          -> resume at Phase 5 (Checklist)
+if tasks.md missing                   -> resume at Phase 6 (Tasks)
+if .analyze-done missing              -> resume at Phase 7 (Analyze)
+if review.md missing                  -> resume at Phase 8 (Review)
+if .stitch-prototype-done missing      -> resume at Phase 9 (Stitch Prototype) [auto-skip if no UI]
+if tasks.md has `- [ ]`              -> resume at Phase 10 (Implement)
+if .stitch-validate-done missing       -> resume at Phase 11 (Stitch Validate) [auto-skip if no UI]
+if .code-review-done missing          -> resume at Phase 12 (Code Review)
+if release-readiness.md missing       -> resume at Phase 13 (Release Readiness)
+if all done                           -> resume at Phase 14 (Tests)
 ```
 
 ### Step 5: Present status and confirm
+
+Show the user a status table and the detected resume point:
 
 ```
 Feature: {branch name}
 Directory: {FEATURE_DIR}
 
 Phase 1  Specify           [x] spec.md found
-Phase 2  Clarify           [x] ## Clarifications present          (optional, --skip-clarify)
+Phase 2  Clarify           [x] ## Clarifications present
 Phase 3  Plan              [x] plan.md found
-Phase 4  UX Research       [x] ux-research-report.md found        (optional, --skip-ux; auto-skip if no UI)
-Phase 5  Checklist         [x] checklists/ has 2 files            (optional, --skip-checklist)
+Phase 4  UX Research       [~] auto-skipped (no UI detected)
+Phase 5  Checklist         [x] checklists/ has 2 files
 Phase 6  Tasks             [x] tasks.md found
 Phase 7  Analyze           [ ] .analyze-done not found
-Phase 8  Review            [ ] --                                  (optional, --skip-review)
-Phase 9  Stitch Prototype  [ ] --                                  (optional, --skip-stitch; auto-skip if no UI)
+Phase 8  Review            [ ] --
+Phase 9  Stitch Prototype  [ ] --
 Phase 10 Implement         [ ] --
-Phase 11 Stitch Validate   [ ] --                                  (optional, --skip-stitch; auto-skip if no UI)
-Phase 12 Code Review       [ ] --                                  (optional, --skip-code-review)
-Phase 13 Release Readiness [ ] --                                  (optional, --skip-release)
+Phase 11 Stitch Validate   [ ] --
+Phase 12 Code Review       [ ] --
+Phase 13 Release           [ ] --
 Phase 14 Tests             [ ] --
 
 > Resuming at Phase 7: Analyze
 ```
 
 Then **immediately begin execution** at the detected resume phase. Do NOT ask for confirmation — the status display IS the notification. If the user wants a different phase, they pass a phase override in `$ARGUMENTS`.
+- If FEATURE_DIR doesn't exist -> start from Phase 1, ask for the feature description.
 
 ### Edge Cases
 
-- **Implementation partially complete**: If `tasks.md` has a mix of `[x]` and `[ ]`, resume at Phase 10. Tell the user how many tasks remain.
-- **Analyze completion marker**: After Phase 7 completes, create `{FEATURE_DIR}/.analyze-done` containing the timestamp. This distinguishes "analyze ran clean" from "analyze never ran."
+- **Implementation partially complete**: If `tasks.md` exists and has a mix of `[x]` and `[ ]`, resume at Phase 10 (Implement). Tell the user how many tasks remain: *"tasks.md: {done}/{total} tasks complete. {remaining} tasks remaining."*
+- **Analyze completion marker**: After Phase 7 (Analyze) completes -- whether it produces `remediation.md` or not -- create a marker file `{FEATURE_DIR}/.analyze-done` containing the timestamp. This distinguishes "analyze ran clean" from "analyze never ran." The `.analyze-done` file is the artifact signal for Phase 7, not `remediation.md`.
 - **Review can be skipped**: If user opts to skip cross-model review, treat Phase 8 as skipped and proceed to Phase 9.
-- **Review found NO failures**: If `review.md` verdict is "READY", Phase 8 is complete.
-- **Review found FAIL items**: Present them and ask whether to (a) fix by re-running an earlier phase, (b) proceed anyway, or (c) abort.
-- **Code review done marker**: After Phase 12 completes, create `{FEATURE_DIR}/.code-review-done` with timestamp. If Phase 12 is skipped, write this marker with `status: skipped` so the resume logic treats it as satisfied.
-- **Checklists may be skipped**: If `tasks.md` exists but `checklists/` doesn't, treat Phase 5 as skipped.
-- **UX Research auto-skip**: If `spec.md` and `plan.md` contain no UI-related keywords, auto-skip Phase 4 and write `ux-research-report.md` with `status: auto-skipped (no UI detected)`.
-- **Stitch auto-skip**: If `spec.md` and `plan.md` contain no UI-related keywords, auto-skip Phases 9 and 11 and write their markers with `status: auto-skipped (no UI detected)`.
-- **Stitch prototype marker**: After Phase 9 completes, create `{FEATURE_DIR}/.stitch-prototype-done` with timestamp. If skipped or auto-skipped, write with appropriate status.
-- **Stitch validate marker**: After Phase 11 completes, create `{FEATURE_DIR}/.stitch-validate-done` with timestamp. If skipped or auto-skipped, write with appropriate status.
+- **Review found NO failures**: If `review.md` exists and overall verdict is "READY", Phase 8 is complete -- proceed to Phase 9.
+- **Review found FAIL items**: If `review.md` has FAIL verdicts, present them and ask user whether to (a) fix the issues by re-running the relevant earlier phase, (b) proceed anyway, or (c) abort.
+- **Code review completion marker**: After Phase 12 (Code Review) completes, create `{FEATURE_DIR}/.code-review-done` with timestamp. If the phase is skipped, write the marker with `status: skipped`.
+- **Checklists may be skipped**: Some features don't use checklists. If `tasks.md` exists but `checklists/` doesn't, treat Phase 5 as skipped.
+- **UX/Stitch auto-skip**: When `spec.md` and `plan.md` contain no UI keywords, auto-skip Phases 4, 9, and 11 without prompting. Log "Auto-skipped: no UI detected" in `progress.md`. If the user explicitly passes `--skip-ux` or `--skip-stitch`, skip regardless of keyword detection.
+- **Stitch markers**: `.stitch-prototype-done` and `.stitch-validate-done` follow the same pattern as `.analyze-done` — created on completion with timestamp and status, or marked `status: skipped` when auto-skipped.
+- **Fresh branch, no specs dir**: Start from Phase 1. Use `FEATURE_DESCRIPTION` from `$ARGUMENTS` if provided; otherwise use `vscode_askQuestions` to ask the user.
 - **User says "start over"**: Warn and confirm before overwriting artifacts.
 
 ### Stale Artifact Detection
 
-After determining the resume phase, check timestamps in this dependency chain:
+After determining the resume phase, check for **stale downstream artifacts** -- files generated by an earlier phase that may be outdated because an upstream artifact was modified later.
+
+Compare file modification timestamps in this dependency chain:
+
 ```
-spec.md -> plan.md -> ux-research-report.md -> tasks.md -> .analyze-done -> review.md -> .stitch-prototype-done -> [implementation] -> .stitch-validate-done -> .code-review-done -> release-readiness.md
+spec.md -> plan.md -> ux-research-report.md -> tasks.md -> .analyze-done -> review.md
+   -> .stitch-prototype-done -> [implementation] -> .stitch-validate-done
+   -> .code-review-done -> release-readiness.md
 ```
 
-If a file is **newer** than a downstream file that depends on it, warn the user:
-> WARNING: **Stale artifact detected**: `plan.md` (modified {date}) was generated before `spec.md` change ({date}). Re-run Phase 3 (Plan) to update, or proceed?
+If a file is **newer** than a downstream file that depends on it (e.g., `spec.md` was modified after `plan.md`), warn the user:
+
+> WARNING: **Stale artifact detected**: `plan.md` (modified {date}) was generated before the latest `spec.md` change ({date}). Plan may not reflect current requirements. Re-run Phase 3 (Plan) to update, or proceed with the current plan?
+
+This is advisory only -- the user decides whether to rerun. Do not block the workflow.
 
 ## Phase Execution Template
 
@@ -307,45 +351,52 @@ For each phase:
 ```
 1. Mark the phase as in-progress in the todo list
 2. Announce: "**Phase N: {Name}** -- delegating to {agent}..."
-3. Delegate to the agent with relevant arguments. The subagent writes its planning and progress to `{FEATURE_DIR}/logs/phase-{N}-{name}.md` per Rule 6.
-4. Summarize the agent's compact return in 2-4 sentences. Discard the full response from working memory.
-5. If a hard gate condition applies (e.g. blockers, critical issues), use the `vscode_askQuestions` tool.
+3. Delegate to the agent with relevant arguments:
+   - Phase 1 (Specify): pass FEATURE_DESCRIPTION from $ARGUMENTS as the argument
+   - Phase 2 (Clarify): pass the feature description and any user feedback
+   - All other phases: pass the feature description and any user-provided refinements
+   The subagent writes its planning and progress to `{FEATURE_DIR}/logs/phase-{N}-{name}.md` per Rule 6.
+4. Summarize the agent's compact return in 2-4 sentences. Record the summary and artifact
+   file paths in your structured context (see Rule 5). Discard the full agent response
+   from working memory -- do not carry it forward.
+5. If a hard gate condition applies (e.g. blockers, critical issues), use `vscode_askQuestions`.
    Otherwise, automatically transition to Phase N+1 without waiting for user input.
 6. Mark phase as completed in the todo list.
 ```
 
-## Phase 4: UX Research
-
-Skip this phase by passing `--skip-ux` or setting `phases.skip_ux: true` in config. Auto-skipped when spec and plan contain no UI-related keywords.
-
-1. Delegate to `speckit.ux-research.analyze` with `spec.md` and `plan.md` as context
-2. Save output to `{FEATURE_DIR}/ux-research-report.md`
-3. Summarize key UX findings and auto-continue to Phase 5
-
-If `speckit.ux-research.analyze` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
-
 ## Phase 8: Cross-Model Review
 
-1. Delegate to `dk.fleet.review` -- runs on the review model (different from primary)
-2. Review agent reads spec.md, plan.md, tasks.md, checklists/, remediation.md
-3. Evaluates 7 dimensions with PASS/WARN/FAIL verdicts
-4. Save review output to `{FEATURE_DIR}/review.md`
-5. Present summary table:
+This phase uses a **different model** than the one that generated plan.md and tasks.md, providing a fresh perspective to catch blind spots.
+
+1. Delegate to `dk.fleet.review` -- it runs on the **review model** configured in Step 2 (a different model than the primary) and is **read-only**
+2. The review agent reads spec.md, plan.md, tasks.md, checklists/, and remediation.md
+3. It evaluates 7 dimensions: spec-plan alignment, plan-tasks completeness, dependency ordering, parallelization correctness, feasibility & risk, standards compliance, implementation readiness
+4. It outputs a structured review report with PASS/WARN/FAIL verdicts per dimension
+5. **Save the review output** to `{FEATURE_DIR}/review.md`
+6. Present the summary table to the user:
    - **All PASS / READY**: *"Cross-model review passed. Ready to implement?"*
-   - **WARN items**: *"Review found {N} warnings. Proceed, or address them first?"*
-   - **FAIL items**: List them, ask which earlier phase to re-run (plan, tasks, or analyze)
-6. If user chooses to fix: loop back, then re-run review after fixes
+   - **WARN items**: *"Review found {N} warnings. Proceed to implementation, or address them first?"*
+   - **FAIL items**: *"Review found {N} critical issues that should be fixed before implementing."* -- list them and ask which earlier phase to re-run (plan, tasks, or analyze)
+7. If user chooses to fix: loop back to the appropriate phase, then re-run review after fixes
+8. If user approves: mark Phase 8 complete and proceed to Phase 9 (Stitch Prototype)
 
 **Note**: Phase 8 (Review) validates design artifacts *before* implementation. Phase 12 (Code Review) validates actual code quality *after* implementation.
 
 ## Phase 9: Stitch Prototype
 
-Skip this phase by passing `--skip-stitch` or setting `phases.skip_stitch: true` in config. Auto-skipped when spec and plan contain no UI-related keywords.
+Skip this phase by passing `--skip-stitch` or setting `phases.skip_stitch: true` in config. Auto-skips if the feature has no UI (same keyword scan as Phase 4).
 
-1. Delegate to `speckit.stitch-implement.prototype` with `spec.md`, `plan.md`, and `ux-research-report.md` (if available) as context
-2. The Stitch agent generates UI prototypes and mockups based on the design artifacts
-3. Summarize the prototypes created and auto-continue to Phase 10 (Implement)
-4. Create `{FEATURE_DIR}/.stitch-prototype-done` with timestamp
+### Purpose
+
+Generate UI prototypes from the design artifacts before implementation begins. Gives the implementation phase concrete visual targets.
+
+### Execution
+
+1. Auto-skip if no UI keywords detected in `spec.md` / `plan.md`. Log "Auto-skipped: no UI detected" in `progress.md`.
+2. Delegate to `speckit.stitch-implement.prototype` with `spec.md`, `plan.md`, and `ux-research-report.md` (if available) as context
+3. The Stitch agent generates UI prototypes and mockups based on the design artifacts
+4. Summarize the prototypes created and auto-continue to Phase 10 (Implement)
+5. Create `{FEATURE_DIR}/.stitch-prototype-done` with timestamp
 
 If `speckit.stitch-implement.prototype` is not installed, use `vscode_askQuestions` to offer install, skip, or abort.
 
@@ -405,74 +456,32 @@ Phase 12 writes all review artifacts to `{FEATURE_DIR}/reviews/`:
 
 Skip this phase by passing `--skip-release` or setting `phases.skip_release: true` in config.
 
-### Purpose
+Generate `{FEATURE_DIR}/release-readiness.md` with READY / CONDITIONAL / NOT READY status. Use `vscode_askQuestions` for the final ship/readiness decision:
 
-Generate a pre-ship checklist covering everything needed to safely deploy the feature. Produces `{FEATURE_DIR}/release-readiness.md` with a machine-readable READY / CONDITIONAL / NOT READY verdict.
-
-### Checklist Areas
-
-Tailor each section to what is relevant based on plan.md surfaces. Skip sections that clearly do not apply (e.g., skip "Feature Flags" if plan.md has no flag references).
-
-| Area | Key questions |
-|------|--------------|
-| Feature flags | Is the feature gated? Flag key, default value, who can enable it? |
-| Rollout strategy | Canary / percentage / full release? Who sees it first? Timeline? |
-| Rollback plan | How do you turn it off? Any database migrations to reverse? |
-| Documentation | User-facing docs updated? API docs generated? Internal runbook? |
-| Monitoring | What metrics change? Alerts configured? Dashboard updated? |
-| Analytics | Key events and funnels defined? |
-| Dependencies | Upstream feature flags? Third-party API limits or version bumps? |
-| Security sign-off | Code review P0/P1 findings fully addressed? |
-
-### Output Format
-
-Save to `{FEATURE_DIR}/release-readiness.md`:
-
-```markdown
-## Release Readiness — {feature name} — {timestamp}
-
-### Status: READY | CONDITIONAL | NOT READY
-
-| Area                | Status      | Notes                                       |
-|---------------------|-------------|---------------------------------------------|
-| Feature flags       | ✅ Done      | Flag: `capability-browser-v1`               |
-| Rollout strategy    | ✅ Done      | Canary 5% → 100% over 3 days               |
-| Rollback plan       | ⚠️ Partial  | No migration rollback documented            |
-| Documentation       | ✅ Done      | PR includes doc update                      |
-| Monitoring          | ❌ Missing   | No alert for capability-list errors         |
-| Analytics           | ✅ Done      | 3 events defined                            |
-| Dependencies        | ✅ Done      | No upstream flag dependencies               |
-| Security sign-off   | ✅ Done      | All P0/P1 from code review resolved         |
-
-### Blocking items (must resolve before shipping)
-- Add monitoring alert for capability-list API errors
-
-### Non-blocking items (recommended before shipping)
-- Document rollback procedure for optional DB index
-```
-
-### Gate Logic
-
-- **READY**: use `vscode_askQuestions` for final ship/readiness approval, then proceed to tests
-- **CONDITIONAL**: use `vscode_askQuestions` to choose proceed to tests or address items first
-- **NOT READY**: list blocking items and use `vscode_askQuestions` to choose fix now, override with an explicit reason, or abort
+- **READY**: approve ship readiness and continue to tests
+- **CONDITIONAL**: choose proceed or address non-blocking items first
+- **NOT READY**: choose fix now, override with an explicit reason, or abort
 
 ## Phase 14: Tests
+
+Detect the project's test runner(s) and run them from the repo root.
+
+If no runner is detected, use `vscode_askQuestions` to ask the user for the test command.
 
 ### Test Runner Detection
 
 | Check | Runner | Command |
 |-------|--------|---------|
 | `package.json` with `"test"` script | npm/yarn/pnpm | `npm test` |
-| `*.sln` or `*.csproj` | dotnet | `dotnet test` |
+| `*.sln` or `*.slnx` or `*.csproj` | dotnet | `dotnet test` |
 | `Makefile` with `test` target | make | `make test` |
 | `pytest.ini` or `pyproject.toml` with `[tool.pytest]` | pytest | `pytest` |
 | `Cargo.toml` | cargo | `cargo test` |
 | `go.mod` | go | `go test ./...` |
 
-If no runner is detected, use `vscode_askQuestions` to ask the user for the test command.
-
 ### CI Remediation Loop
+
+If CI fails, run a remediation loop (same pattern as the Implement-Verify loop):
 
 ```
 repeat:
@@ -488,33 +497,52 @@ until: CI passes OR user says skip/abort OR 3 iterations reached
 
 Cap at 3 iterations. After 3 rounds, warn: *"These likely need manual debugging."*
 
+### Tests Pass
+
+When all tests pass, proceed to the Completion Summary.
+
 ## Error Recovery
 
 ### Parallel Task Failure
 
-When a task within a parallel group fails during Phase 8:
-1. Let other in-flight tasks finish
-2. Report failed task(s) with error details
+When a task within a parallel group fails during Phase 10 (Implement):
+1. **Let the other in-flight tasks finish** -- don't abort tasks that are already running
+2. Report which task(s) failed with error details
 3. Offer: **Retry failed only** / **Retry entire group** / **Skip and continue** using `vscode_askQuestions`
 4. Never auto-retry -- always use `vscode_askQuestions`
 
 ### Sub-Agent Timeout or Crash
 
+If a delegated sub-agent doesn't return (timeout) or returns an error:
 1. Report the phase and agent that failed
 2. Offer to retry the same phase or skip it
-3. If same agent fails twice, suggest the user run it manually
+3. If the same agent fails twice in a row, suggest the user run it manually (`/speckit.{agent}`) and then resume the fleet
 
 ## Phase Rollback
 
-At any hard gate, the user may say "go back to Phase N":
-1. Warn about downstream invalidation
-2. Delete marker files only (`.analyze-done`, `.code-review-done`, `.stitch-prototype-done`, `.stitch-validate-done`, `review.md`, `release-readiness.md`, `ux-research-report.md`)
-3. Update the todo list -- reset all phases from target onward to `not-started`
-4. Resume from the target phase
+At any hard gate, the user may say "go back to Phase N" or "rollback to plan." The fleet supports this:
+
+1. **Identify the target phase**: Parse the user's request to determine which phase to roll back to.
+2. **Warn about downstream invalidation**: All artifacts generated by phases *after* the target phase are now potentially stale. Show:
+   > Rolling back to Phase {N} ({name}). The following artifacts may be invalidated:
+   > - plan.md (Phase 3)
+   > - tasks.md (Phase 6)
+   > - Implementation (Phase 10)
+   >
+   > These will be regenerated as the workflow proceeds. Continue?
+3. **Delete marker files only**: Remove `.analyze-done`, `.stitch-prototype-done`, `.stitch-validate-done`, `.code-review-done`, `review.md`, `release-readiness.md`, and `ux-research-report.md` for invalidated phases. Do NOT delete spec.md, plan.md, or tasks.md -- they'll be overwritten when the phase re-runs.
+4. **Update the todo list**: Reset all phases from the target phase onward to `not-started`.
+5. **Resume from the target phase**: Follow the normal phase execution flow from that point.
+
+**Constraints**:
+- Cannot rollback during an active sub-agent delegation -- wait for it to complete first
+- Rollback to Phase 1 (Specify) with "start over" requires explicit confirmation since it regenerates everything
 
 ## Completion Summary
 
-```markdown
+After Phase 14 completes (CI passes or user skips CI), present a structured summary:
+
+```
 ## Fleet Complete
 
 Feature: {feature name}
@@ -522,10 +550,10 @@ Branch: {branch name}
 Duration: Phases 1-14 ({phases completed}/{phases total}, {phases skipped} skipped)
 
 ### Artifacts Generated
-- spec.md -- feature specification
-- plan.md -- technical plan
+- spec.md -- feature specification ({word count} words, {user stories count} user stories)
+- plan.md -- technical plan ({components count} components)
 - ux-research-report.md -- UX research findings (if applicable)
-- tasks.md -- {total tasks} tasks ({completed} completed)
+- tasks.md -- {total tasks} tasks ({completed} completed, {remaining} remaining)
 - review.md -- cross-model review (verdict: {verdict})
 - .stitch-prototype-done -- Stitch prototype confirmation (if applicable)
 - .stitch-validate-done -- Stitch validation verdict (if applicable)

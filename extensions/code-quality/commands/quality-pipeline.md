@@ -44,7 +44,7 @@ GATE rules:
 
 <!-- GREP:CQ-PIPELINE-REVIEW -->
 ```
-RUN /speckit.code-quality.review
+RUN /dk.code-quality.review
 
 CHECK output:
   - code-review.md exists in reviews/
@@ -59,7 +59,7 @@ GATE:
 
 <!-- GREP:CQ-PIPELINE-FIX -->
 ```
-RUN /speckit.code-quality.fix
+RUN /dk.code-quality.fix
 
 CHECK output:
   - code-fix-report.md exists in reviews/
@@ -79,7 +79,7 @@ GATE:
 
 <!-- GREP:CQ-PIPELINE-VALIDATE -->
 ```
-RUN /speckit.code-quality.validate
+RUN /dk.code-quality.validate
 
 CHECK output:
   - validation-report.md exists in reviews/
@@ -97,7 +97,7 @@ GATE:
 
 <!-- GREP:CQ-PIPELINE-FUTURE -->
 ```
-RUN /speckit.code-quality.future
+RUN /dk.code-quality.future
 
 CHECK output:
   - future-ideas.md exists in reviews/
@@ -127,6 +127,26 @@ Write `quality-summary.md` to `{feature_dir}/reviews/`:
 
 [Any unresolved critical findings or missing requirements]
 
+### Step 7: specfact Sync (conditional)
+
+<!-- GREP:CQ-PIPELINE-SF-SYNC -->
+
+```bash
+config_file=".specify/extensions/code-quality/code-quality-config.yml"
+sync_after_pipeline=$(yq eval '.code_quality.specfact.sync_after_pipeline // false' "$config_file" 2>/dev/null || echo "false")
+```
+
+If `sync_after_pipeline` is `true` in config:
+```
+PRINT: "🔗 sync_after_pipeline is enabled — exporting quality findings to specfact..."
+RUN dk.code-quality.specfact-sync
+```
+
+Otherwise:
+```
+💡 To export all quality findings to specfact, run:  /dk.code-quality.specfact-sync
+```
+
 ## Artifacts Generated
 
 All reports saved to: `{feature_dir}/reviews/`
@@ -135,6 +155,7 @@ All reports saved to: `{feature_dir}/reviews/`
 - `validation-report.md` — FR/NFR traceability, testability, docs
 - `future-ideas.md` — improvement roadmap
 - `quality-summary.md` — this summary
+- `quality-export.json` — specfact-compatible export (when `sync_after_pipeline: true` or `/dk.code-quality.specfact-sync` is run)
 
 ## Next Steps
 
@@ -143,4 +164,4 @@ All reports saved to: `{feature_dir}/reviews/`
 
 ## Output
 
-Runs all 4 stages sequentially with gates. Produces 5 report files in `{feature_dir}/reviews/`.
+Runs all 4 stages sequentially with gates. Produces 5 report files in `{feature_dir}/reviews/` plus an optional `quality-export.json` for specfact governance.

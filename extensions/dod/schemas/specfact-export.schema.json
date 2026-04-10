@@ -1,0 +1,198 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/danieldekay/spec-kit-extensions/raw/main/extensions/dod/schemas/specfact-export.schema.json",
+  "title": "Spec-Kit DoD — specfact Export Format v1",
+  "description": "Format produced by dk.dod.export for consumption by the specfact CLI (specfact govern check-dod). Compatible with specfact-cli v0.22.0+.",
+  "type": "object",
+  "required": ["$schema_id", "version", "feature", "generated_at", "requirements", "gates", "enforcement"],
+  "properties": {
+    "$schema_id": {
+      "type": "string",
+      "const": "speckit-dod-export-v1",
+      "description": "Export format identifier for specfact parsing"
+    },
+    "version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "feature": { "type": "string" },
+    "feature_tag": { "type": ["string", "null"] },
+    "spec_file": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "speckit_dod_version": { "type": "string" },
+
+    "requirements": {
+      "type": "object",
+      "required": ["functional", "non_functional", "summary"],
+      "properties": {
+        "functional": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "status", "criteria_total", "criteria_passed", "testable"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "priority": { "type": "string" },
+              "status": { "type": "string", "enum": ["pending", "passed", "failed", "skipped"] },
+              "criteria_total": { "type": "integer" },
+              "criteria_passed": { "type": "integer" },
+              "criteria_failed": { "type": "integer" },
+              "testable": {
+                "type": "boolean",
+                "description": "True when all criteria have at least one test file or test ID"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["id", "description", "type", "test_strategy", "status"],
+                  "properties": {
+                    "id": { "type": "string" },
+                    "description": { "type": "string" },
+                    "type": { "type": "string" },
+                    "scenario": {
+                      "type": "object",
+                      "properties": {
+                        "given": { "type": "string" },
+                        "when": { "type": "string" },
+                        "then": { "type": "string" }
+                      }
+                    },
+                    "test_strategy": { "type": "string" },
+                    "status": { "type": "string" },
+                    "test_files": { "type": "array", "items": { "type": "string" } },
+                    "test_ids": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "non_functional": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "category", "status", "criteria_total", "criteria_passed", "measurable"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "category": { "type": "string" },
+              "priority": { "type": "string" },
+              "status": { "type": "string", "enum": ["pending", "passed", "failed", "skipped"] },
+              "criteria_total": { "type": "integer" },
+              "criteria_passed": { "type": "integer" },
+              "criteria_failed": { "type": "integer" },
+              "measurable": {
+                "type": "boolean",
+                "description": "True when all criteria have a defined measurement method and threshold or audit plan"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["id", "description", "type", "measurement_method", "status"],
+                  "properties": {
+                    "id": { "type": "string" },
+                    "description": { "type": "string" },
+                    "type": { "type": "string" },
+                    "metric": { "type": ["string", "null"] },
+                    "threshold": {
+                      "type": "object",
+                      "properties": {
+                        "operator": { "type": "string" },
+                        "value": { "type": ["number", "string", "null"] },
+                        "unit": { "type": "string" }
+                      }
+                    },
+                    "measurement_method": { "type": "string" },
+                    "measurement_tool": { "type": ["string", "null"] },
+                    "measurement_command": { "type": ["string", "null"] },
+                    "status": { "type": "string" },
+                    "measured_value": { "type": ["number", "string", "null"] },
+                    "measured_at": { "type": ["string", "null"] }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "required": ["fr_total", "fr_passed", "fr_failed", "fr_pending", "nfr_total", "nfr_passed", "nfr_failed", "nfr_pending", "overall_status"],
+          "properties": {
+            "fr_total": { "type": "integer" },
+            "fr_passed": { "type": "integer" },
+            "fr_failed": { "type": "integer" },
+            "fr_pending": { "type": "integer" },
+            "nfr_total": { "type": "integer" },
+            "nfr_passed": { "type": "integer" },
+            "nfr_failed": { "type": "integer" },
+            "nfr_pending": { "type": "integer" },
+            "overall_status": { "type": "string", "enum": ["pending", "passed", "failed"] }
+          }
+        }
+      }
+    },
+
+    "gates": {
+      "type": "object",
+      "required": ["ready_for_sprint", "definition_of_done"],
+      "properties": {
+        "ready_for_sprint": {
+          "type": "object",
+          "required": ["status", "checks"],
+          "properties": {
+            "status": { "type": "string", "enum": ["pending", "passed", "failed"] },
+            "checks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["description", "passed"],
+                "properties": {
+                  "description": { "type": "string" },
+                  "passed": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "definition_of_done": {
+          "type": "object",
+          "required": ["status", "checks"],
+          "properties": {
+            "status": { "type": "string", "enum": ["pending", "passed", "failed"] },
+            "checks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["description", "passed"],
+                "properties": {
+                  "description": { "type": "string" },
+                  "passed": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "enforcement": {
+      "type": "object",
+      "required": ["level"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["observe", "warn", "enforce"],
+          "description": "observe: report only  |  warn: log warnings  |  enforce: fail CI pipeline"
+        },
+        "fail_on": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["ready_for_sprint", "definition_of_done"] },
+          "description": "Which gates trigger a CI failure when enforcement level is 'enforce'"
+        }
+      }
+    }
+  }
+}

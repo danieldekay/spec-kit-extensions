@@ -201,29 +201,23 @@ Write `code-review.md` to `{feature_dir}/reviews/`:
 ## Action Items (prioritized)
 
 <!--
-  GREPPABLE FORMAT: each item MUST also appear as a FINDING-NNN line below.
-  Format: FINDING-NNN: severity | category | location | description
+  GREPPABLE FORMAT: each item MUST also appear as a checkbox item starting with - [ ] FINDING-NNN
+  Format: - [ ] FINDING-NNN: severity | category | location | description
   Severity: critical | high | medium | low | info
   Category: refactor | tech-debt | dead-code | smell | perf | security
-  Shell: grep "^FINDING-" code-review.md
+  Shell: grep "\- \[ \] FINDING-" code-review.md
          sk-query.sh findings code-review.md
          sk-query.sh critical code-review.md
 -->
 
 ### Must Fix (Critical/High)
-1. [ID] — [description] — [file:line]
-
-FINDING-001: critical | [category] | [file:line] | [description]
+- [ ] FINDING-001: critical | [category] | [file:line] | [description]
 
 ### Should Fix (Medium)
-1. [ID] — [description] — [file:line]
-
-FINDING-002: medium | [category] | [file:line] | [description]
+- [ ] FINDING-002: medium | [category] | [file:line] | [description]
 
 ### Consider (Low)
-1. [ID] — [description] — [file:line]
-
-FINDING-003: low | [category] | [file:line] | [description]
+- [ ] FINDING-003: low | [category] | [file:line] | [description]
 ```
 
 ## Output

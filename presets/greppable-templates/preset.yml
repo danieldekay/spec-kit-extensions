@@ -3,7 +3,7 @@ schema_version: "1.0"
 preset:
   id: "greppable-templates"
   name: "Greppable Templates"
-  version: "1.0.0"
+  version: "0.1.0"
   description: "Replaces core spec/tasks/checklist templates with greppable versions. Each artifact item carries a structured line-start prefix (FR-NNN, SC-NNN, TASK-TNNN, CHK-NNN) so shell scripts can query content by type. Ships sk-query.sh for FRs, SCs, tasks, open/done filtering, user-story scoping, and completion stats. Also provides a shared findings template (FINDING-NNN) used by code-quality and ux-research extensions."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"

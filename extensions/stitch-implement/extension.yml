@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "stitch-implement"
   name: "Stitch Implementation Assistant"
-  version: "1.0.0"
+  version: "0.1.0"
   description: "Adds a Stitch MCP sub-agent to the implementation phase for UI prototyping, pattern validation, and code extraction."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
@@ -60,6 +60,37 @@ tags:
   - "implementation"
   - "prototyping"
   - "mcp"
+
+changelog: "https://github.com/danieldekay/spec-kit-extensions/blob/main/extensions/stitch-implement/CHANGELOG.md"
+
+support:
+  issues: "https://github.com/danieldekay/spec-kit-extensions/issues"
+
+config_schema:
+  type: "object"
+  properties:
+    stitch:
+      type: "object"
+      properties:
+        mode:
+          type: "string"
+          enum: ["prototype", "validate", "both"]
+        auto_extract_code:
+          type: "boolean"
+        variant_count:
+          type: "integer"
+          minimum: 1
+          maximum: 5
+        resolution:
+          type: "string"
+          pattern: "^\\d+x\\d+$"
+          description: "WxH format, e.g. 1024x768"
+        project_prefix:
+          type: "string"
+        output_directory:
+          type: "string"
+        skip_backend_tasks:
+          type: "boolean"
 
 defaults:
   stitch:

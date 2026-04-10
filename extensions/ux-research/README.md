@@ -8,6 +8,12 @@ Adds a UX research phase to the spec-kit planning workflow. Automatically identi
 specify extension add ux-research --source ./extensions/ux-research
 ```
 
+## Commands
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `speckit.ux-research.analyze` | `speckit.ux-research.ux` | Analyze spec for UX needs, discover existing patterns, produce report |
+
 ## What It Does
 
 After the planning phase (`/speckit.plan`), this extension:

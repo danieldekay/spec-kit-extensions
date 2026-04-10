@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "ux-research"
   name: "UX Research Phase"
-  version: "1.0.0"
+  version: "0.1.0"
   description: "Adds a UX research phase to planning that identifies required UX changes and discovers reusable patterns from the existing tech stack."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
@@ -43,6 +43,40 @@ tags:
   - "planning"
   - "design"
   - "patterns"
+
+changelog: "https://github.com/danieldekay/spec-kit-extensions/blob/main/extensions/ux-research/CHANGELOG.md"
+
+support:
+  issues: "https://github.com/danieldekay/spec-kit-extensions/issues"
+
+config_schema:
+  type: "object"
+  properties:
+    ux_research:
+      type: "object"
+      properties:
+        scan_depth:
+          type: "string"
+          enum: ["full", "shallow", "targeted"]
+        include_component_audit:
+          type: "boolean"
+        include_interaction_flows:
+          type: "boolean"
+        output_format:
+          type: "string"
+          enum: ["markdown", "json"]
+        pattern_directories:
+          type: "array"
+          items:
+            type: "string"
+        tech_stack:
+          type: "array"
+          items:
+            type: "string"
+        component_registries:
+          type: "array"
+          items:
+            type: "string"
 
 defaults:
   ux_research:

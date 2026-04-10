@@ -1,0 +1,166 @@
+schema_version: "1.0"
+
+extension:
+  id: "dod"
+  name: "Definition of Done"
+  version: "0.1.0"
+  description: "Generates machine-readable, testable Definitions of Done for FR and NFR. Produces dod.yml that can be validated in CI and exported to specfact.com tooling."
+  author: "danieldekay"
+  repository: "https://github.com/danieldekay/spec-kit-extensions"
+  license: "MIT"
+  homepage: "https://github.com/danieldekay/spec-kit-extensions/tree/main/extensions/dod"
+
+requires:
+  speckit_version: ">=0.2.0"
+  commands:
+    - "speckit.specify"
+
+provides:
+  commands:
+    - name: "dk.dod.generate"
+      file: "commands/dod-generate.md"
+      description: "Parse spec.md and generate dod.yml with machine-readable, testable DoD criteria for each FR and NFR"
+      aliases: ["dk.dod.gen"]
+      user-invocable: true
+
+    - name: "dk.dod.validate"
+      file: "commands/dod-validate.md"
+      description: "Validate the current implementation against dod.yml, update criterion statuses, and write a validation report"
+      aliases: ["dk.dod.check"]
+      user-invocable: true
+
+    - name: "dk.dod.export"
+      file: "commands/dod-export.md"
+      description: "Export dod.yml to specfact-compatible JSON for CI/CD enforcement and specfact governance checks"
+      aliases: ["dk.dod.sf"]
+      user-invocable: true
+
+    - name: "dk.dod.report"
+      file: "commands/dod-report.md"
+      description: "Generate a human-readable DoD status report summarising coverage, gate status, and open items"
+      aliases: ["dk.dod.rpt"]
+      user-invocable: true
+
+  config:
+    - name: "dod-config.yml"
+      template: "config-template.yml"
+      description: "DoD configuration: specfact project ID, enforcement level, NFR category defaults"
+      required: false
+
+hooks:
+  after_specify:
+    command: "dk.dod.generate"
+    optional: true
+    prompt: "Generate machine-readable Definition of Done from spec.md?"
+    description: "Parses FR/NFR tables in spec.md and writes dod.yml with testable criteria and measurement thresholds"
+    condition: null
+
+  after_implement:
+    command: "dk.dod.validate"
+    optional: true
+    prompt: "Validate implementation against Definition of Done?"
+    description: "Checks test coverage for each FR criterion and measures NFR thresholds; updates dod.yml statuses"
+    condition: null
+
+tags:
+  - "definition-of-done"
+  - "requirements"
+  - "testing"
+  - "specfact"
+  - "quality-gates"
+  - "nfr"
+  - "fr"
+
+changelog: "https://github.com/danieldekay/spec-kit-extensions/blob/main/extensions/dod/CHANGELOG.md"
+
+support:
+  issues: "https://github.com/danieldekay/spec-kit-extensions/issues"
+
+config_schema:
+  type: "object"
+  properties:
+    dod:
+      type: "object"
+      properties:
+        criteria_per_fr:
+          type: "integer"
+          description: "Default number of DoD criteria to generate per FR (min 1, max 5)"
+        nfr_defaults:
+          type: "object"
+          description: "Default measurement methods per NFR category"
+          properties:
+            performance:
+              type: "object"
+              properties:
+                method:
+                  type: "string"
+                  enum: ["benchmark", "monitoring", "manual"]
+                tool:
+                  type: "string"
+            security:
+              type: "object"
+              properties:
+                method:
+                  type: "string"
+                  enum: ["automated", "audit", "manual"]
+                tool:
+                  type: "string"
+            accessibility:
+              type: "object"
+              properties:
+                method:
+                  type: "string"
+                  enum: ["automated", "audit", "manual"]
+                tool:
+                  type: "string"
+        enforcement_level:
+          type: "string"
+          enum: ["observe", "warn", "enforce"]
+          description: "specfact enforcement level for CI gates"
+        specfact:
+          type: "object"
+          properties:
+            project_id:
+              type: "string"
+              description: "specfact project bundle ID (from .specfact/projects/)"
+            feature_tag_prefix:
+              type: "string"
+              description: "Prefix used when tagging features in specfact (e.g. 'sk-')"
+            export_on_validate:
+              type: "boolean"
+              description: "Automatically export dod-export.json after each validate run"
+            export_path:
+              type: "string"
+              description: "Output directory for specfact-compatible export files"
+
+defaults:
+  dod:
+    criteria_per_fr: 2
+    nfr_defaults:
+      performance:
+        method: "benchmark"
+        tool: ""
+      security:
+        method: "automated"
+        tool: "SAST"
+      accessibility:
+        method: "automated"
+        tool: "axe-core"
+      availability:
+        method: "monitoring"
+        tool: ""
+      scalability:
+        method: "benchmark"
+        tool: ""
+      compatibility:
+        method: "automated"
+        tool: ""
+      maintainability:
+        method: "audit"
+        tool: ""
+    enforcement_level: "observe"
+    specfact:
+      project_id: null
+      feature_tag_prefix: "sk-"
+      export_on_validate: false
+      export_path: ".specfact/dod-exports"

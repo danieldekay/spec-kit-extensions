@@ -14,7 +14,7 @@ $ARGUMENTS
 
 The user input is the **change request description** — what they want to add, remove, or modify from the current feature scope.
 
-If `$ARGUMENTS` is empty, ask: *"Describe the scope change you want to make:"*
+If `$ARGUMENTS` is empty, use `vscode_askQuestions` to ask: *"Describe the scope change you want to make:"*
 
 ---
 
@@ -45,7 +45,7 @@ For each artifact, assess whether the change request affects it:
 | plan.md | {HIGH / MEDIUM / LOW / NONE} | {1-sentence reason} |
 | checklists/ | {HIGH / MEDIUM / LOW / NONE} | {1-sentence reason} |
 | tasks.md | {HIGH / MEDIUM / LOW / NONE} | {1-sentence reason} |
-| code-review.md | {HIGH / MEDIUM / LOW / NONE} | {1-sentence reason} |
+| reviews/code-review.md | {HIGH / MEDIUM / LOW / NONE} | {1-sentence reason} |
 | release-readiness.md | {HIGH / MEDIUM / LOW / NONE} | {1-sentence reason} |
 
 For each `HIGH` or `MEDIUM` impact artifact, list specific sections that need updating.
@@ -77,18 +77,18 @@ Present this to the user before making any changes:
 | plan.md | MEDIUM | Add component: {name} |
 | tasks.md | HIGH | +4 tasks, modify 2 existing |
 | checklists/ | LOW | Update acceptance criteria |
-| code-review.md | NONE | — |
+| reviews/code-review.md | NONE | — |
 | release-readiness.md | NONE | — |
 
 ### Phases to re-run
 - Phase 1 (Specify) — to capture new user story
 - Phase 3 (Plan) — to cover new component
-- Phase 5 (Tasks) — to add new tasks
+- Phase 6 (Tasks) — to add new tasks
 
 ### Effort: S (4 new tasks)
 ```
 
-Then ask:
+Then use `vscode_askQuestions` to ask:
 > **Approve this change request?**
 > - **Approve** — proceed with updates
 > - **Revise** — adjust the CR scope (re-run analysis)

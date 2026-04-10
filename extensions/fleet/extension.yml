@@ -3,8 +3,8 @@ schema_version: "1.0"
 extension:
   id: "fleet"
   name: "Fleet Orchestrator"
-  version: "1.1.0"
-  description: "Full-lifecycle feature orchestrator: 12-phase workflow (specify → clarify → plan → checklist → tasks → analyze → review → implement → code-review → verify → release-readiness → CI) with human-in-the-loop gates, parallel code-review agents, circuit breaker, progress.md session log, and machine-readable .fleet-status.yml tracker. Includes sync-verify and change-request cross-cutting commands."
+  version: "0.1.0"
+  description: "Autonomous 14-phase feature lifecycle orchestrator: specify → clarify → plan → ux-research → checklist → tasks → analyze → review → stitch-prototype → implement → stitch-validate → code-review → release-readiness → CI. Auto-resumes, WIP auto-commits after every phase, auto-stashes dirty worktrees, and only interrupts via vscode_askQuestions for critical blockers or final ship approval. UX research and Stitch phases auto-skip when the feature has no UI."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
   license: "MIT"
@@ -23,27 +23,28 @@ requires:
 
 provides:
   commands:
-    - name: "speckit.fleet.run"
+    - name: "dk.fleet.run"
       file: "commands/fleet-run.md"
-      description: "Orchestrate a full feature lifecycle through all SpecKit phases with human-in-the-loop checkpoints. Detects partially complete features and resumes from the right phase."
+      description: "Orchestrate a full feature lifecycle through all SpecKit phases with auto-resume and autonomous operation. Uses vscode_askQuestions only for critical blockers and final ship approval."
+      aliases: ["dk.fleet"]
       user-invocable: true
 
-    - name: "speckit.fleet.review"
+    - name: "dk.fleet.review"
       file: "commands/fleet-review.md"
       description: "Cross-model evaluation of plan.md and tasks.md before implementation — reviews feasibility, completeness, dependency ordering, risk, and parallelization correctness."
       user-invocable: false
 
-    - name: "speckit.fleet.agents-install"
+    - name: "dk.fleet.agents-install"
       file: "commands/fleet-agents-install.md"
       description: "Copies fleet .agent.md files to .github/agents/ for VS Code Copilot users."
       user-invocable: true
 
-    - name: "speckit.fleet.sync"
+    - name: "dk.fleet.sync"
       file: "commands/fleet-sync.md"
       description: "Cross-cutting artifact drift detector. Run at any point in the lifecycle to check that all generated artifacts are consistent with each other across 7 consistency layers."
       user-invocable: true
 
-    - name: "speckit.fleet.change-request"
+    - name: "dk.fleet.change-request"
       file: "commands/fleet-change-request.md"
       description: "Formal scope change management. Assigns CR-NNN identifiers, performs impact analysis across all artifacts, and updates affected files with CR markers."
       user-invocable: true
@@ -55,7 +56,7 @@ provides:
       required: false
 
 # Bundled agent files for VS Code Copilot (not installed by spec-kit automatically).
-# Run speckit.fleet.agents-install or copy manually:
+# Run dk.fleet.agents-install or copy manually:
 #   mkdir -p .github/agents
 #   cp <extension-path>/agents/*.agent.md .github/agents/
 
@@ -68,6 +69,76 @@ tags:
   - "automation"
   - "phases"
 
+changelog: "https://github.com/danieldekay/spec-kit-extensions/blob/main/extensions/fleet/CHANGELOG.md"
+
+support:
+  issues: "https://github.com/danieldekay/spec-kit-extensions/issues"
+
+config_schema:
+  type: "object"
+  properties:
+    fleet:
+      type: "object"
+      properties:
+        models:
+          type: "object"
+          properties:
+            primary:
+              type: "string"
+              description: "'auto' or a model name"
+            review:
+              type: "string"
+              description: "'ask' to prompt, or a model name to auto-use"
+        phases:
+          type: "object"
+          properties:
+            skip_clarify:
+              type: "boolean"
+            skip_ux:
+              type: "boolean"
+            skip_checklist:
+              type: "boolean"
+            skip_review:
+              type: "boolean"
+            skip_stitch:
+              type: "boolean"
+            skip_code_review:
+              type: "boolean"
+            skip_release:
+              type: "boolean"
+        qa:
+          type: "object"
+          properties:
+            cadence:
+              type: "string"
+              enum: ["per_phase", "batch_end"]
+            run_review:
+              type: "boolean"
+            run_fix:
+              type: "boolean"
+            run_validate:
+              type: "boolean"
+            run_future:
+              type: "boolean"
+            pause_on_critical:
+              type: "boolean"
+        git:
+          type: "object"
+          properties:
+            auto_commit:
+              type: "boolean"
+            auto_stash:
+              type: "boolean"
+        context:
+          type: "object"
+          properties:
+            compact_after_phase:
+              type: "boolean"
+            suggest_fresh_chat_at_phase:
+              type: "integer"
+              minimum: 1
+              maximum: 14
+
 defaults:
   fleet:
     models:
@@ -78,19 +149,21 @@ defaults:
       skip_checklist: false
       skip_review: false
       skip_code_review: false
-      skip_verify: false
       skip_release: false
+      skip_ux: false
+      skip_stitch: false
     qa:
       cadence: "per_phase"      # per_phase | batch_end
-      security: true
-      code_quality: true
-      patterns: true
-      tests: true
+      run_review: true
+      run_fix: true
+      run_validate: true
+      run_future: true
+      pause_on_critical: true
     git:
       checkpoint_after_tasks: true
       checkpoint_after_implement: true
-      checkpoint_after_verify: true
-      auto_commit: false
+      auto_commit: true
+      auto_stash: true
     context:
       compact_after_phase: true
       suggest_fresh_chat_at_phase: 5
