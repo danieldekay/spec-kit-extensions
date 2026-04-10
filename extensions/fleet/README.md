@@ -115,3 +115,72 @@ Key settings:
 - `speckit >= 0.2.0`
 - Core SpecKit commands: `speckit.specify`, `speckit.clarify`, `speckit.plan`, `speckit.checklist`, `speckit.tasks`, `speckit.analyze`, `speckit.implement`
 - Recommended companion extensions for the full Fleet experience: `ux-research`, `stitch-implement`, `code-quality`
+
+## Workflow Diagram — Core + Extensions
+
+Fleet wraps the entire Spec Kit core flow and interleaves extension phases where they add the most value. Core commands run unconditionally (or with simple skip flags); extension phases degrade gracefully when the extension is not installed.
+
+```mermaid
+flowchart TD
+    %% ── Styles ──
+    classDef core fill:#1f6feb,stroke:#1f6feb,color:#fff
+    classDef ext fill:#8957e5,stroke:#8957e5,color:#fff
+    classDef fleet fill:#da3633,stroke:#da3633,color:#fff
+    classDef notint fill:#30363d,stroke:#8b949e,color:#8b949e,stroke-dasharray:5 5
+
+    %% ── Pre-flight ──
+    PRE["🔒 Pre-flight<br/>git stash · HEAD check · branch freshness<br/>artifact detection · resume logic"]
+
+    %% ── Phase nodes ──
+    P1["① Specify<br/><b>speckit.specify</b><br/>→ spec.md"]:::core
+    P2["② Clarify ◇<br/><b>speckit.clarify</b><br/>→ §Clarifications"]:::core
+    P3["③ Plan<br/><b>speckit.plan</b><br/>→ plan.md"]:::core
+    P4["④ UX Research ◇<br/><b>speckit.ux-research.analyze</b><br/>→ ux-research-report.md"]:::ext
+    P5["⑤ Checklist ◇<br/><b>speckit.checklist</b><br/>→ checklists/"]:::core
+    P6["⑥ Tasks<br/><b>speckit.tasks</b><br/>→ tasks.md"]:::core
+    P7["⑦ Analyze<br/><b>speckit.analyze</b><br/>→ .analyze-done"]:::core
+    P8["⑧ Review ◇<br/><b>speckit.fleet.review</b><br/>→ review.md"]:::ext
+    P9["⑨ Stitch Prototype ◇<br/><b>speckit.stitch-implement.prototype</b><br/>→ .stitch-prototype-done"]:::ext
+    P10["⑩ Implement<br/><b>speckit.implement</b><br/>→ all ☑ in tasks.md"]:::core
+    P11["⑪ Stitch Validate ◇<br/><b>speckit.stitch-implement.validate</b><br/>→ .stitch-validate-done"]:::ext
+    P12["⑫ Code Review ◇<br/><b>speckit.code-quality.pipeline</b><br/>→ reviews/"]:::ext
+    P13["⑬ Release Readiness ◇<br/>fleet orchestrator<br/>→ release-readiness.md"]:::fleet
+    P14["⑭ Tests<br/>terminal CI runner<br/>→ tests pass"]:::fleet
+
+    %% ── Not integrated ──
+    NI_CI["⛌ codebase-impact<br/><i>hook: after_plan</i><br/><i>not wired into fleet</i>"]:::notint
+    NI_DOD["⛌ dod<br/><i>hooks: after_specify,<br/>after_implement</i><br/><i>not wired into fleet</i>"]:::notint
+    NI_MAQA["⛌ maqa-github-projects<br/><i>standalone</i><br/><i>not wired into fleet</i>"]:::notint
+
+    %% ── Flow ──
+    PRE --> P1
+    P1 --> P2 --> P3 --> P4 --> P5 --> P6
+    P6 --> P7 --> P8 --> P9 --> P10
+    P10 --> P11 --> P12 --> P13 --> P14
+
+    %% ── Not-integrated hooks (dashed) ──
+    P3 -. "after_plan hook" .-> NI_CI
+    P1 -. "after_specify hook" .-> NI_DOD
+    P10 -. "after_implement hook" .-> NI_DOD
+```
+
+**Legend:** ◇ = optional / skippable &ensp;|&ensp; 🟦 core spec-kit &ensp;|&ensp; 🟪 extension &ensp;|&ensp; 🟥 fleet-only &ensp;|&ensp; ⬛ not integrated
+
+### Coverage Analysis
+
+| Source | Commands | In Fleet? |
+|--------|----------|-----------|
+| **Spec Kit core** (8) | `constitution`, `specify`, `clarify`, `plan`, `checklist`, `tasks`, `analyze`, `implement` | 7 of 8 — `constitution` is a one-time project init, not a per-feature phase |
+| **ux-research** ext | `speckit.ux-research.analyze` | ✅ Phase 4 — auto-skips if no UI keywords in spec/plan |
+| **stitch-implement** ext | `speckit.stitch-implement.prototype`, `.validate` | ✅ Phases 9 & 11 — auto-skip if no UI keywords |
+| **code-quality** ext | `speckit.code-quality.pipeline` | ✅ Phase 12 — post-implementation quality gate |
+| **fleet** (own) | `speckit.fleet.review`, release readiness, CI | ✅ Phases 8, 13, 14 |
+| **codebase-impact** ext | `speckit.codebase-impact.analyze` | ❌ Not wired — `after_plan` hook exists but fleet skips it |
+| **dod** ext | `speckit.dod.generate`, `.validate`, `.export`, `.report` | ❌ Not wired — `after_specify` and `after_implement` hooks exist but fleet skips them |
+| **maqa-github-projects** ext | `speckit.maqa-github-projects.bootstrap`, `.populate` | ❌ Standalone — no hook overlap with fleet phases |
+
+### Gaps
+
+1. **`codebase-impact`** — natural fit between Phase 3 (Plan) and Phase 5 (Checklist). Fleet could invoke `speckit.codebase-impact.analyze` as Phase 3b, feeding IMPACT-NNN candidates into tasks.md.
+2. **`dod`** — could generate `dod.yml` after Phase 1 (Specify) and validate criteria after Phase 10 (Implement), providing a machine-readable acceptance gate before code review.
+3. **`maqa-github-projects`** — could sync task completion to GitHub Projects after Phase 6 (Tasks) and Phase 10 (Implement), though this is more of a side-effect than a pipeline phase.
