@@ -68,15 +68,45 @@ OUTPUT: ui-task-list
   | T009    | Settings page layout     | Settings           | Tabs, FormField    |
 ```
 
-### Step 3: Create Stitch Project
+### Step 3: Resolve Stitch Project
 
 <!-- GREP:STITCH-PROJECT-SETUP -->
-```
-USE stitch/create_project:
-  name: "speckit-{feature-name}"
-  description: "UI prototypes for {feature-name}"
 
-STORE project_id for subsequent calls
+Check for a local config override first:
+
+```
+local_config=".specify/extensions/stitch-implement/stitch-implement-config.local.yml"
+
+IF local_config exists AND stitch.projects[] is non-empty:
+  USE first matching project from stitch.projects[]
+  project_id = projects[0].id
+  LOG "Reusing configured project: {projects[0].name} ({project_id})"
+ELSE:
+  USE stitch/create_project:
+    name: "speckit-{feature-name}"
+    description: "UI prototypes for {feature-name}"
+  STORE project_id for subsequent calls
+```
+
+### Step 3b: Load Design Masters
+
+<!-- GREP:STITCH-DESIGN-MASTERS -->
+
+If `stitch.design_masters[]` is configured, load each master screen to extract its design theme and visual patterns:
+
+```
+IF local_config exists AND stitch.design_masters[] is non-empty:
+  FOR each master in design_masters:
+    USE stitch/get_screen:
+      project_id: master.project_id
+      screen_id: master.id
+    EXTRACT design_theme (colorMode, font, roundness, customColor, saturation)
+    EXTRACT layout patterns, component styles, spacing rhythm
+  STORE as design_context for use in screen generation prompts
+  LOG "Loaded {count} design master(s) as style reference"
+ELSE:
+  design_context = null
+  LOG "No design masters configured — screens will use Stitch defaults"
 ```
 
 ### Step 4: Generate Screens (Prototype Mode)
@@ -90,6 +120,9 @@ FOR each UI task:
      - Component mapping from ux-research-report (if available)
      - Design tokens from codebase (colors, typography, spacing)
      - Existing component patterns to match
+     - Design master context (if loaded in Step 3b) — include colour mode,
+       font family, roundness, accent colour, and layout rhythm so generated
+       screens match the established visual language
 
   2. GENERATE screen:
      USE stitch/generate_screen_from_text:

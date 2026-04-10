@@ -24,3 +24,26 @@ stitch:
 
   # Skip validation for non-UI tasks
   skip_backend_tasks: true
+
+  # ── Stitch projects to use ──────────────────────────────────────────
+  # Discovered via `speckit.stitch-implement.setup`. Each entry pins a
+  # Stitch project so prototype/validate commands reuse it instead of
+  # creating throwaway projects every run.
+  projects: []
+    # - id: "6139132077804554844"
+    #   name: "My App"
+    #   device_type: "DESKTOP"   # DESKTOP | MOBILE | TABLET
+
+  # ── Design master screen IDs ───────────────────────────────────────
+  # Screens that define the visual reference for the project. The
+  # prototype command copies their design theme and layout patterns
+  # when generating new screens.
+  design_masters: []
+    # - id: "d7237c7d78f44befa4f60afb17c818c1"
+    #   project_id: "6139132077804554844"
+    #   label: "Homepage hero"
+
+  # ── Companion skills ───────────────────────────────────────────────
+  # Install these for the full Stitch workflow:
+  #   npx skills add https://github.com/google-labs-code/stitch-skills --skill stitch-loop
+  #   npx skills add https://github.com/google-labs-code/stitch-skills --skill taste-design

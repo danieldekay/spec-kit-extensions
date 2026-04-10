@@ -3,8 +3,8 @@ schema_version: "1.0"
 extension:
   id: "stitch-implement"
   name: "Stitch Implementation Assistant"
-  version: "0.1.0"
-  description: "Adds a Stitch MCP sub-agent to the implementation phase for UI prototyping, pattern validation, and code extraction."
+  version: "0.2.0"
+  description: "Adds a Stitch MCP sub-agent for UI prototyping, pattern validation, and code extraction. Supports pinned projects, design master screens, and companion skills (stitch-loop, taste-design)."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
   license: "MIT"
@@ -31,6 +31,11 @@ provides:
     - name: "speckit.stitch-implement.validate"
       file: "commands/stitch-validate.md"
       description: "Validate implemented UI against Stitch prototypes and design tokens"
+      user-invocable: true
+
+    - name: "speckit.stitch-implement.setup"
+      file: "commands/stitch-setup.md"
+      description: "Discover Stitch projects and design master screens, write config override"
       user-invocable: true
 
   config:
@@ -60,6 +65,8 @@ tags:
   - "implementation"
   - "prototyping"
   - "mcp"
+  - "stitch-loop"
+  - "taste-design"
 
 changelog: "https://github.com/danieldekay/spec-kit-extensions/blob/main/extensions/stitch-implement/CHANGELOG.md"
 
@@ -91,6 +98,28 @@ config_schema:
           type: "string"
         skip_backend_tasks:
           type: "boolean"
+        projects:
+          type: "array"
+          description: "Stitch projects to reuse (discovered via setup command)"
+          items:
+            type: "object"
+            properties:
+              id: { type: "string" }
+              name: { type: "string" }
+              device_type:
+                type: "string"
+                enum: ["DESKTOP", "MOBILE", "TABLET"]
+            required: ["id"]
+        design_masters:
+          type: "array"
+          description: "Screens used as visual reference for new screen generation"
+          items:
+            type: "object"
+            properties:
+              id: { type: "string" }
+              project_id: { type: "string" }
+              label: { type: "string" }
+            required: ["id", "project_id"]
 
 defaults:
   stitch:
@@ -98,3 +127,5 @@ defaults:
     auto_extract_code: true
     variant_count: 2
     resolution: "1024x768"
+    projects: []
+    design_masters: []

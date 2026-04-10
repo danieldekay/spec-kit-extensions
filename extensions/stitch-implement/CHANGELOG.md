@@ -5,6 +5,21 @@ All notable changes to the `stitch-implement` extension.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-04-10
+
+### Added
+
+- `speckit.stitch-implement.setup` command — interactive Stitch project and screen discovery that writes a local config override.
+- Config: `stitch.projects` list — pin Stitch projects for reuse across runs instead of creating throwaway projects.
+- Config: `stitch.design_masters` list — designate screens as visual style references for new screen generation.
+- Companion skill references: `stitch-loop` and `taste-design` from `google-labs-code/stitch-skills`.
+
+### Changed
+
+- `stitch-prototype` now checks for configured projects before creating new ones (Step 3).
+- `stitch-prototype` loads design master screens and injects their design theme into generation prompts (Step 3b).
+- README: added Configuration table, Companion Skills section, and new GREP tags for setup command.
+
 ## [0.1.0] — 2026-04-09
 
 ### Changed
