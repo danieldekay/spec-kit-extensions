@@ -3,8 +3,8 @@ schema_version: "1.0"
 extension:
   id: "fleet"
   name: "Fleet Orchestrator"
-  version: "0.1.1"
-  description: "Autonomous 14-phase feature lifecycle orchestrator: specify → clarify → plan → ux-research → checklist → tasks → analyze → review → stitch-prototype → implement → stitch-validate → code-review → release-readiness → CI. Auto-resumes, WIP auto-commits after every phase, auto-stashes dirty worktrees, and only interrupts via vscode_askQuestions for critical blockers or final ship approval. UX research and Stitch phases auto-skip when the feature has no UI."
+  version: "0.2.0"
+  description: "Autonomous 17-phase feature lifecycle orchestrator: specify → dod-generate → clarify → plan → codebase-impact → ux-research → checklist → tasks → analyze → review → stitch-prototype → implement → dod-validate → stitch-validate → code-review (adversarial multi-model) → release-readiness → CI. Auto-resumes, WIP auto-commits after every phase, auto-stashes dirty worktrees, and only interrupts via vscode_askQuestions for critical blockers or final ship approval. DoD, Codebase Impact, UX Research, and Stitch phases auto-skip when their extension is missing or the feature has no UI."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
   license: "MIT"
@@ -20,6 +20,10 @@ requires:
     - "speckit.tasks"
     - "speckit.analyze"
     - "speckit.implement"
+    - "speckit.dod.generate"
+    - "speckit.dod.validate"
+    - "speckit.codebase-impact.analyze"
+    - "speckit.code-quality.pipeline"
 
 provides:
   commands:
@@ -106,6 +110,10 @@ config_schema:
               type: "boolean"
             skip_release:
               type: "boolean"
+            skip_dod:
+              type: "boolean"
+            skip_impact:
+              type: "boolean"
         qa:
           type: "object"
           properties:
@@ -137,7 +145,19 @@ config_schema:
             suggest_fresh_chat_at_phase:
               type: "integer"
               minimum: 1
-              maximum: 14
+              maximum: 17
+        adversarial:
+          type: "object"
+          properties:
+            enabled:
+              type: "boolean"
+            models:
+              type: "array"
+              items:
+                type: "string"
+            threshold:
+              type: "string"
+              enum: ["critical", "high", "medium", "low"]
 
 defaults:
   fleet:
@@ -152,6 +172,8 @@ defaults:
       skip_release: false
       skip_ux: false
       skip_stitch: false
+      skip_dod: false
+      skip_impact: false
     qa:
       cadence: "per_phase"      # per_phase | batch_end
       run_review: true

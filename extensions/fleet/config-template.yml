@@ -22,36 +22,42 @@ fleet:
     review: "ask"
 
   phases:
-    # Skip Phase 2 (Clarify) automatically — or pass --skip-clarify at runtime
+    # Skip Phases 2+13 (DoD Generate/Validate) automatically — or pass --skip-dod at runtime
+    skip_dod: false
+
+    # Skip Phase 3 (Clarify) automatically — or pass --skip-clarify at runtime
     skip_clarify: false
 
-    # Skip Phase 4 (UX Research) automatically — or pass --skip-ux at runtime
+    # Skip Phase 6 (UX Research) automatically — or pass --skip-ux at runtime
     # Auto-skips when spec.md/plan.md contain no UI keywords
     skip_ux: false
 
-    # Skip Phase 5 (Checklist) automatically — or pass --skip-checklist at runtime
+    # Skip Phase 5 (Codebase Impact) automatically — or pass --skip-impact at runtime
+    skip_impact: false
+
+    # Skip Phase 7 (Checklist) automatically — or pass --skip-checklist at runtime
     skip_checklist: false
 
-    # Skip Phase 8 (Cross-model review) automatically — or pass --skip-review at runtime
+    # Skip Phase 10 (Cross-model review) automatically — or pass --skip-review at runtime
     skip_review: false
 
-    # Skip Phases 9+11 (Stitch Prototype/Validate) automatically — or pass --skip-stitch at runtime
+    # Skip Phases 11+14 (Stitch Prototype/Validate) automatically — or pass --skip-stitch at runtime
     # Auto-skips when spec.md/plan.md contain no UI keywords
     skip_stitch: false
 
-    # Skip Phase 12 (Code Review) automatically — or pass --skip-code-review at runtime
+    # Skip Phase 15 (Code Review) automatically — or pass --skip-code-review at runtime
     skip_code_review: false
 
-    # Skip Phase 13 (Release Readiness) automatically — or pass --skip-release at runtime
+    # Skip Phase 16 (Release Readiness) automatically — or pass --skip-release at runtime
     skip_release: false
 
   qa:
-    # When to run the Phase 12 code-quality pipeline
-    #   per_phase: immediately after Phase 10 (Implement) — default
+    # When to run the Phase 15 code-quality pipeline
+    #   per_phase: immediately after Phase 12 (Implement) — default
     #   batch_end: run once at the end of all implementation batches
     cadence: "per_phase"
 
-    # Toggle individual code-quality pipeline stages (Phase 12)
+    # Toggle individual code-quality pipeline stages (Phase 15)
     run_review: true     # Generate reviews/code-review.md
     run_fix: true        # Apply auto-fixes and generate reviews/code-fix-report.md
     run_validate: true   # Generate reviews/validation-report.md
@@ -66,7 +72,7 @@ fleet:
     checkpoint_after_implement: true
 
     # Auto-commit WIP after every artifact-producing phase (default: true)
-    # When false, falls back to asking via vscode_askQuestions after Phases 6 and 10 only
+    # When false, falls back to asking via vscode_askQuestions after Phases 8 and 12 only
     auto_commit: true
 
     # Auto-stash uncommitted changes before fleet run (default: true)
@@ -78,8 +84,25 @@ fleet:
     compact_after_phase: true
 
     # Suggest a fresh chat starting at this phase number (to avoid context exhaustion)
-    suggest_fresh_chat_at_phase: 6
+    suggest_fresh_chat_at_phase: 8
 
   parallelism:
     # Maximum number of concurrent subagents during Plan, Implement, and Code Review phases
     max_concurrent: 3
+
+  adversarial:
+    # Enable adversarial multi-model review pass during Phase 15 (Code Review)
+    # Dispatches 2-3 review subagents in parallel on different AI models,
+    # each independently reviewing the diff for bugs, security, logic errors.
+    # Inspired by the Anvil agent pattern.
+    enabled: true
+
+    # Models to use for adversarial review (each reviewer runs on a different model)
+    # Ensure the agent runtime has access to these models.
+    models:
+      - "gpt-4.1"
+      - "gemini-2.5-pro"
+      - "claude-sonnet-4"
+
+    # Minimum severity to report: "critical", "high", "medium", or "low"
+    threshold: "medium"

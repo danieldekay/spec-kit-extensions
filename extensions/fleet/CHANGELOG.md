@@ -20,6 +20,25 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Alias format corrected to `speckit.{extension}.{command}` pattern.
 - Agent file names updated (`speckit.fleet.run.agent.md`, `speckit.fleet.review.agent.md`).
 
+## [0.2.0] — 2025-07-24
+
+### Added
+
+- Phase 2: DoD Generate — produces machine-readable `dod.yml` from spec acceptance criteria.
+- Phase 5: Codebase Impact — scans codebase for integration points, produces IMPACT-NNN task candidates.
+- Phase 13: DoD Validate — validates implementation against `dod.yml` acceptance criteria.
+- Adversarial multi-model review in Phase 15 — dispatches 2-3 review subagents on different AI models with consensus scoring (anvil-inspired).
+- Config: `adversarial` section with `enabled`, `models`, and `threshold` settings.
+- Config: `skip_dod` and `skip_impact` phase flags.
+
+### Changed
+
+- Expanded from 14 to 17 phases with full pipeline renumbering.
+- Updated all artifact detection, resume logic, stale artifact chains, and edge cases for 17-phase pipeline.
+- Config: updated all phase number references throughout.
+- README: updated phases table, key behaviors, config table, Mermaid workflow diagram, coverage analysis, and gaps.
+- Companion extensions now include `dod` and `codebase-impact` alongside `ux-research`, `stitch-implement`, `code-quality`.
+
 ## [2.0.0] — 2026-04-09
 
 ### Changed
