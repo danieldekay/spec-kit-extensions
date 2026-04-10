@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/danieldekay/spec-kit-extensions/raw/main/extensions/dod/schemas/specfact-export.schema.json",
   "title": "Spec-Kit DoD — specfact Export Format v1",
-  "description": "Format produced by dk.dod.export for consumption by the specfact CLI (specfact govern check-dod). Compatible with specfact-cli v0.22.0+.",
+  "description": "Format produced by speckit.dod.export for consumption by the specfact CLI (specfact govern check-dod). Compatible with specfact-cli v0.22.0+.",
   "type": "object",
   "required": ["$schema_id", "version", "feature", "generated_at", "requirements", "gates", "enforcement"],
   "properties": {

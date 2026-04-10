@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "fleet"
   name: "Fleet Orchestrator"
-  version: "0.1.0"
+  version: "0.1.1"
   description: "Autonomous 14-phase feature lifecycle orchestrator: specify → clarify → plan → ux-research → checklist → tasks → analyze → review → stitch-prototype → implement → stitch-validate → code-review → release-readiness → CI. Auto-resumes, WIP auto-commits after every phase, auto-stashes dirty worktrees, and only interrupts via vscode_askQuestions for critical blockers or final ship approval. UX research and Stitch phases auto-skip when the feature has no UI."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
@@ -23,28 +23,28 @@ requires:
 
 provides:
   commands:
-    - name: "dk.fleet.run"
+    - name: "speckit.fleet.run"
       file: "commands/fleet-run.md"
       description: "Orchestrate a full feature lifecycle through all SpecKit phases with auto-resume and autonomous operation. Uses vscode_askQuestions only for critical blockers and final ship approval."
-      aliases: ["dk.fleet"]
+      aliases: ["speckit.fleet.go"]
       user-invocable: true
 
-    - name: "dk.fleet.review"
+    - name: "speckit.fleet.review"
       file: "commands/fleet-review.md"
       description: "Cross-model evaluation of plan.md and tasks.md before implementation — reviews feasibility, completeness, dependency ordering, risk, and parallelization correctness."
       user-invocable: false
 
-    - name: "dk.fleet.agents-install"
+    - name: "speckit.fleet.agents-install"
       file: "commands/fleet-agents-install.md"
       description: "Copies fleet .agent.md files to .github/agents/ for VS Code Copilot users."
       user-invocable: true
 
-    - name: "dk.fleet.sync"
+    - name: "speckit.fleet.sync"
       file: "commands/fleet-sync.md"
       description: "Cross-cutting artifact drift detector. Run at any point in the lifecycle to check that all generated artifacts are consistent with each other across 7 consistency layers."
       user-invocable: true
 
-    - name: "dk.fleet.change-request"
+    - name: "speckit.fleet.change-request"
       file: "commands/fleet-change-request.md"
       description: "Formal scope change management. Assigns CR-NNN identifiers, performs impact analysis across all artifacts, and updates affected files with CR markers."
       user-invocable: true
@@ -56,7 +56,7 @@ provides:
       required: false
 
 # Bundled agent files for VS Code Copilot (not installed by spec-kit automatically).
-# Run dk.fleet.agents-install or copy manually:
+# Run speckit.fleet.agents-install or copy manually:
 #   mkdir -p .github/agents
 #   cp <extension-path>/agents/*.agent.md .github/agents/
 

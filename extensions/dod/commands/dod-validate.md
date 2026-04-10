@@ -6,7 +6,7 @@ description: "Validate the current implementation against dod.yml, update criter
 
 Check every criterion in `dod.yml` against the current implementation. For each FR criterion — find test files and test IDs. For each NFR criterion — measure or audit the implementation against the defined threshold. Update statuses (`pending` → `passed`/`failed`/`skipped`) in-place in `dod.yml` and write a human-readable `dod-validation-report.md`.
 
-This command is the source of truth for the CI gate: after running it, `dk.dod.export` can push results to specfact for enforcement.
+This command is the source of truth for the CI gate: after running it, `speckit.dod.export` can push results to specfact for enforcement.
 
 ## User Input
 
@@ -14,7 +14,7 @@ $ARGUMENTS
 
 ## Prerequisites
 
-1. `dod.yml` exists in the active feature directory (created by `dk.dod.generate`)
+1. `dod.yml` exists in the active feature directory (created by `speckit.dod.generate`)
 2. Implementation tasks are complete (all `[x]` in `tasks.md`)
 3. Tests have been written
 
@@ -31,7 +31,7 @@ report_file="$feature_dir/dod-validation-report.md"
 config_file=".specify/extensions/dod/dod-config.yml"
 ```
 
-Abort if `dod.yml` does not exist. Instruct the user to run `dk.dod.generate` first.
+Abort if `dod.yml` does not exist. Instruct the user to run `speckit.dod.generate` first.
 
 Load config:
 ```bash
@@ -212,16 +212,16 @@ For each failed or pending NFR criterion:
 
 ### Step 7: Conditional specfact Export
 
-If `export_on_validate` is `true` in config, automatically invoke `dk.dod.export` after writing the report:
+If `export_on_validate` is `true` in config, automatically invoke `speckit.dod.export` after writing the report:
 
 ```
-PRINT: "🔗 export_on_validate is enabled — running dk.dod.export..."
-RUN dk.dod.export
+PRINT: "🔗 export_on_validate is enabled — running speckit.dod.export..."
+RUN speckit.dod.export
 ```
 
 Otherwise print:
 ```
-💡 To push results to specfact, run: /dk.dod.export
+💡 To push results to specfact, run: /speckit.dod.export
 ```
 
 ### Step 8: Final Summary

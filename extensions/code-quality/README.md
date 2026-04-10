@@ -12,12 +12,12 @@ specify extension add code-quality --source ./extensions/code-quality
 
 | Command | Alias | Description |
 |---------|-------|-------------|
-| `dk.code-quality.pipeline` | `dk.code-quality.all` | Full pipeline: review → fix → validate → future ideas |
-| `dk.code-quality.review` | `dk.code-quality.cr` | Identify refactoring, tech debt, dead code, code smells |
-| `dk.code-quality.fix` | `dk.code-quality.cf` | Auto-fix issues from the review report |
-| `dk.code-quality.validate` | `dk.code-quality.vr` | Validate FR/NFR implementation, testability, documentation |
-| `dk.code-quality.future` | `dk.code-quality.fi` | Generate improvement and evolution ideas |
-| `dk.code-quality.specfact-sync` | `dk.code-quality.sf` | Export quality findings to specfact-compatible JSON; optionally run `specfact govern check` |
+| `speckit.code-quality.pipeline` | `speckit.code-quality.all` | Full pipeline: review → fix → validate → future ideas |
+| `speckit.code-quality.review` | `speckit.code-quality.cr` | Identify refactoring, tech debt, dead code, code smells |
+| `speckit.code-quality.fix` | `speckit.code-quality.cf` | Auto-fix issues from the review report |
+| `speckit.code-quality.validate` | `speckit.code-quality.vr` | Validate FR/NFR implementation, testability, documentation |
+| `speckit.code-quality.future` | `speckit.code-quality.fi` | Generate improvement and evolution ideas |
+| `speckit.code-quality.specfact-sync` | `speckit.code-quality.sf` | Export quality findings to specfact-compatible JSON; optionally run `specfact govern check` |
 
 ## Pipeline Flow
 
@@ -65,7 +65,7 @@ All reports are saved to `{feature-dir}/reviews/`:
 | `validation-report.md` | FR/NFR traceability, testability matrix, documentation coverage |
 | `future-ideas.md` | Performance, scalability, DX, feature evolution roadmap |
 | `quality-summary.md` | Pipeline summary with stage results and next steps |
-| `quality-export.json` | specfact-compatible export (`speckit-quality-export-v1`), produced by `dk.code-quality.specfact-sync` |
+| `quality-export.json` | specfact-compatible export (`speckit-quality-export-v1`), produced by `speckit.code-quality.specfact-sync` |
 
 ## Grep Tags
 
@@ -152,7 +152,7 @@ The `code-quality` extension integrates with [specfact](https://specfact.com) fo
 2. **Run the sync command** after a quality pipeline run:
 
    ```
-   /dk.code-quality.specfact-sync
+   /speckit.code-quality.specfact-sync
    ```
 
 3. **Enable automatic sync** so every pipeline run exports to specfact:
@@ -165,7 +165,7 @@ The `code-quality` extension integrates with [specfact](https://specfact.com) fo
 
 ### dod Extension Bridge
 
-If the [`dod` extension](../dod/README.md) is also installed, `dk.code-quality.validate` will
+If the [`dod` extension](../dod/README.md) is also installed, `speckit.code-quality.validate` will
 automatically write validated FR/NFR statuses back into `dod.yml`, keeping the definition of done
 in sync with validation results. Enable with:
 

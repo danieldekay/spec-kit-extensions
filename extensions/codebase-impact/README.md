@@ -12,7 +12,7 @@ specify extension add codebase-impact --source ./extensions/codebase-impact
 
 | Command | Alias | Description |
 |---------|-------|-------------|
-| `dk.codebase-impact.analyze` | `dk.codebase-impact` | Scan codebase for integration points, affected features, and task candidates |
+| `speckit.codebase-impact.analyze` | `speckit.codebase-impact.scan` | Scan codebase for integration points, affected features, and task candidates |
 
 ## What It Does
 

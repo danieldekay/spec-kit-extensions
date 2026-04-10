@@ -42,7 +42,7 @@ The repository is already strong in scope, intent, and RFC alignment. The bigges
 - Add or normalize any missing grep tags across command sections.
 
 #### L — Large
-- Add a `dk.code-quality.report` command to combine all generated artifacts into one dashboard view.
+- Add a `speckit.code-quality.report` command to combine all generated artifacts into one dashboard view.
 - Formalize the `dod` bridge contract so status propagation is deterministic.
 
 #### XL — Extra Large
@@ -66,7 +66,7 @@ The repository is already strong in scope, intent, and RFC alignment. The bigges
 - Add a short “when to run this command” guide in the README.
 
 #### L — Large
-- Add `dk.dod.fix` or `dk.dod.sync` to repair mild schema issues or migrate older `dod.yml` files.
+- Add `speckit.dod.fix` or `speckit.dod.sync` to repair mild schema issues or migrate older `dod.yml` files.
 
 #### XL — Extra Large
 - Define a shared DoD/validation contract used by `dod`, `code-quality`, and `fleet`.
@@ -192,7 +192,7 @@ The repository is already strong in scope, intent, and RFC alignment. The bigges
 
 ### S — Small
 - Standardize manifest metadata completeness across all extensions.
-- Standardize namespace usage (`dk.*` vs `speckit.*`).
+- ~~Standardize namespace usage (`dk.*` vs `speckit.*`).~~ ✅ Done — all commands use `speckit.*` namespace.
 - Keep changelog and SemVer conventions identical everywhere.
 
 ### M — Medium
@@ -344,7 +344,7 @@ The `ux-research` extension does scan for reusable UI patterns, but only for fro
 
 ### Proposed Solution
 
-Add a new extension command `dk.codebase-impact.analyze` (or extend the existing plan Phase 0) that runs a structured codebase interaction analysis _before_ design decisions are finalized.
+Add a new extension command `speckit.codebase-impact.analyze` (or extend the existing plan Phase 0) that runs a structured codebase interaction analysis _before_ design decisions are finalized.
 
 #### What It Produces: `codebase-impact.md`
 

@@ -126,13 +126,13 @@ Examples from this repo:
 
 | Full command name | Extension |
 |-------------------|-----------|
-| `dk.code-quality.pipeline` | code-quality |
-| `dk.code-quality.specfact-sync` | code-quality |
-| `dk.dod.generate` | dod |
-| `dk.dod.validate` | dod |
-| `dk.fleet.run` | fleet |
-| `dk.codebase-impact.analyze` | codebase-impact |
-| `dk.ux-research.analyze` | ux-research |
+| `speckit.code-quality.pipeline` | code-quality |
+| `speckit.code-quality.specfact-sync` | code-quality |
+| `speckit.dod.generate` | dod |
+| `speckit.dod.validate` | dod |
+| `speckit.fleet.run` | fleet |
+| `speckit.codebase-impact.analyze` | codebase-impact |
+| `speckit.ux-research.analyze` | ux-research |
 
 Aliases are allowed and declared in `provides.commands[*].aliases`.
 
@@ -161,7 +161,7 @@ Hooks are declared under `hooks:` in `extension.yml`. The `optional: true` flag 
 Post-implementation code quality pipeline. Runs review → fix → validate → future-ideas with gate checks between stages, plus specfact export for CI governance.
 
 Hook: `after_implement`  
-Key commands: `dk.code-quality.pipeline`, `dk.code-quality.validate`, `dk.code-quality.specfact-sync`  
+Key commands: `speckit.code-quality.pipeline`, `speckit.code-quality.validate`, `speckit.code-quality.specfact-sync`  
 Integrates with: [specfact.com](https://specfact.com), [`dod` extension](#dod--v100) (optional bridge)
 
 ### `dod` — v0.1.0
@@ -169,7 +169,7 @@ Integrates with: [specfact.com](https://specfact.com), [`dod` extension](#dod--v
 Generates machine-readable, testable Definitions of Done from `spec.md`. Produces `dod.yml` validated against a JSON Schema, updates criterion statuses after implementation, and exports to specfact-compatible JSON for CI/CD enforcement.
 
 Hooks: `after_specify` (generate), `after_implement` (validate)  
-Key commands: `dk.dod.generate`, `dk.dod.validate`, `dk.dod.export`, `dk.dod.report`  
+Key commands: `speckit.dod.generate`, `speckit.dod.validate`, `speckit.dod.export`, `speckit.dod.report`  
 Schemas: `schemas/dod.schema.json` (dod.yml), `schemas/specfact-export.schema.json` (specfact export, format ID: `speckit-dod-export-v1`)
 
 ### `fleet` — v0.1.0
@@ -177,28 +177,28 @@ Schemas: `schemas/dod.schema.json` (dod.yml), `schemas/specfact-export.schema.js
 Autonomous 14-phase feature lifecycle orchestrator. Runs specify → clarify → plan → ux-research → checklist → tasks → analyze → review → stitch-prototype → implement → stitch-validate → code-review → release-readiness → CI. Auto-resumes from interruptions, only surfaces `vscode_askQuestions` for critical blockers.
 
 Hook: standalone (orchestrates all core hooks internally)  
-Key commands: `dk.fleet.run`, `dk.fleet.sync`, `dk.fleet.change-request`
+Key commands: `speckit.fleet.run`, `speckit.fleet.sync`, `speckit.fleet.change-request`
 
 ### `maqa-github-projects` — v0.1.0
 
 GitHub Projects v2 integration. Populates draft issues from specs, moves items across status columns, ticks task lists in issue bodies.
 
 Hook: standalone  
-Key commands: `dk.maqa-github-projects.bootstrap`, `dk.maqa-github-projects.populate`
+Key commands: `speckit.maqa-github-projects.bootstrap`, `speckit.maqa-github-projects.populate`
 
 ### `codebase-impact` — v0.1.0
 
 Codebase impact analysis phase. Scans the existing codebase for integration points, affected features, dependency stability, and test impact. Produces `codebase-impact.md` with greppable `IMPACT-NNN` task candidates that feed into `tasks.md`.
 
 Hook: `after_plan`
-Key commands: `dk.codebase-impact.analyze`
+Key commands: `speckit.codebase-impact.analyze`
 
 ### `stitch-implement` — v0.1.0
 
 Stitch MCP sub-agent for UI prototyping and validation during implementation.
 
 Hooks: `before_implement` / `after_implement`  
-Key commands: `dk.stitch-implement.prototype`, `dk.stitch-implement.validate`  
+Key commands: `speckit.stitch-implement.prototype`, `speckit.stitch-implement.validate`  
 Requires: Stitch MCP server `>=1.0.0`
 
 ### `ux-research` — v0.1.0
@@ -206,7 +206,7 @@ Requires: Stitch MCP server `>=1.0.0`
 Adds a UX research phase to planning. Identifies required UX changes and discovers reusable patterns from the existing tech stack.
 
 Hook: `after_plan`  
-Key commands: `dk.ux-research.analyze`
+Key commands: `speckit.ux-research.analyze`
 
 ---
 

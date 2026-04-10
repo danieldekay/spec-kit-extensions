@@ -11,17 +11,23 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Reset to v0.1.0 for pre-release development.
 
+## [0.1.1] — 2026-04-10
+
+### Fixed
+
+- Command namespace corrected to `speckit.dod.*` for `specify` CLI compliance.
+
 ## [1.0.0] — 2026-04-09
 
 ### Added
 
 - Initial release.
-- `dk.dod.generate` — parse `spec.md` and write `dod.yml` with per-FR Given/When/Then criteria and per-NFR threshold/audit criteria.
-- `dk.dod.validate` — check implementation and test coverage against `dod.yml`; update statuses; write `dod-validation-report.md`.
-- `dk.dod.export` — produce `specfact-export-v1` JSON for consumption by the specfact CLI governance engine.
-- `dk.dod.report` — render a human-readable DoD status summary (console or Markdown file).
-- `after_specify` hook that prompts to run `dk.dod.generate` immediately after `speckit.specify`.
-- `after_implement` hook that prompts to run `dk.dod.validate` after implementation is complete.
+- `speckit.dod.generate` — parse `spec.md` and write `dod.yml` with per-FR Given/When/Then criteria and per-NFR threshold/audit criteria.
+- `speckit.dod.validate` — check implementation and test coverage against `dod.yml`; update statuses; write `dod-validation-report.md`.
+- `speckit.dod.export` — produce `specfact-export-v1` JSON for consumption by the specfact CLI governance engine.
+- `speckit.dod.report` — render a human-readable DoD status summary (console or Markdown file).
+- `after_specify` hook that prompts to run `speckit.dod.generate` immediately after `speckit.specify`.
+- `after_implement` hook that prompts to run `speckit.dod.validate` after implementation is complete.
 - JSON Schema for `dod.yml` (`schemas/dod.schema.json`).
 - JSON Schema for the specfact export format (`schemas/specfact-export.schema.json`).
 - Two quality gates: `ready_for_sprint` and `definition_of_done`.

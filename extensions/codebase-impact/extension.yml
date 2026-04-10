@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "codebase-impact"
   name: "Codebase Impact Analysis"
-  version: "0.1.0"
+  version: "0.1.1"
   description: "Analyzes how new or changed code interacts with the existing codebase. Produces an integration surface map, affected-feature inventory, dependency stability audit, and IMPACT-NNN task candidates for tasks.md."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
@@ -17,10 +17,10 @@ requires:
 
 provides:
   commands:
-    - name: "dk.codebase-impact.analyze"
+    - name: "speckit.codebase-impact.analyze"
       file: "commands/codebase-impact-analyze.md"
       description: "Scan the codebase for integration points, affected features, and dependency stability. Produces codebase-impact.md with IMPACT-NNN task candidates."
-      aliases: ["dk.codebase-impact"]
+      aliases: ["speckit.codebase-impact.scan"]
       user-invocable: true
 
   config:
@@ -31,7 +31,7 @@ provides:
 
 hooks:
   after_plan:
-    command: "dk.codebase-impact.analyze"
+    command: "speckit.codebase-impact.analyze"
     optional: true
     prompt: "Run codebase impact analysis to identify integration points and required changes to existing code?"
     description: "Scans the codebase for files and features affected by the planned work, producing codebase-impact.md with IMPACT-NNN task candidates."

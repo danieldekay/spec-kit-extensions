@@ -247,7 +247,7 @@ FOR each FR in validation-report.md:
     FOR each criterion in dod.yml FR:
       IF criterion.status is "pending":
         SET criterion.status: "failed"
-        APPEND evidence.notes: "Not implemented per dk.code-quality.validate"
+        APPEND evidence.notes: "Not implemented per speckit.code-quality.validate"
 
   IF FR status is ⚠️ PARTIAL:
     Leave criterion statuses as-is; append a note to FR.implementation.status_note
@@ -279,12 +279,12 @@ sync_after_validate=$(yq eval '.code_quality.specfact.sync_after_validate // fal
 
 If `sync_after_validate` is `true` in config:
 ```
-PRINT: "🔗 sync_after_validate is enabled — running dk.code-quality.specfact-sync..."
-RUN dk.code-quality.specfact-sync
+PRINT: "🔗 sync_after_validate is enabled — running speckit.code-quality.specfact-sync..."
+RUN speckit.code-quality.specfact-sync
 ```
 
 Otherwise:
 ```
-💡 To push quality results to specfact:  /dk.code-quality.specfact-sync
-💡 To update DoD enforcement gate:       /dk.dod.export  (if dod extension is installed)
+💡 To push quality results to specfact:  /speckit.code-quality.specfact-sync
+💡 To update DoD enforcement gate:       /speckit.dod.export  (if dod extension is installed)
 ```

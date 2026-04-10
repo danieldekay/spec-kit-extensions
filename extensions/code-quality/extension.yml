@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "code-quality"
   name: "Code Quality Pipeline"
-  version: "0.1.0"
+  version: "0.1.1"
   description: "Post-implementation code quality pipeline: review, fix, future ideas, and FR/NFR validation with testability and documentation checks. Includes specfact integration for quality governance and DoD bridging."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
@@ -17,37 +17,37 @@ requires:
 
 provides:
   commands:
-    - name: "dk.code-quality.review"
+    - name: "speckit.code-quality.review"
       file: "commands/code-review.md"
       description: "Code review: identify refactoring opportunities, tech debt, dead code, and code smells"
-      aliases: ["dk.code-quality.cr"]
+      aliases: ["speckit.code-quality.cr"]
       user-invocable: true
 
-    - name: "dk.code-quality.fix"
+    - name: "speckit.code-quality.fix"
       file: "commands/code-fix.md"
       description: "Auto-fix issues identified in the code review report"
-      aliases: ["dk.code-quality.cf"]
+      aliases: ["speckit.code-quality.cf"]
 
-    - name: "dk.code-quality.future"
+    - name: "speckit.code-quality.future"
       file: "commands/future-ideas.md"
       description: "Generate ideas for improving and extending the feature"
-      aliases: ["dk.code-quality.fi"]
+      aliases: ["speckit.code-quality.fi"]
 
-    - name: "dk.code-quality.validate"
+    - name: "speckit.code-quality.validate"
       file: "commands/validate-requirements.md"
       description: "Validate FR/NFR implementation, testability, and documentation coverage"
-      aliases: ["dk.code-quality.vr"]
+      aliases: ["speckit.code-quality.vr"]
 
-    - name: "dk.code-quality.pipeline"
+    - name: "speckit.code-quality.pipeline"
       file: "commands/quality-pipeline.md"
       description: "Run the full quality pipeline: review → fix → validate → future ideas → specfact sync"
-      aliases: ["dk.code-quality.all"]
+      aliases: ["speckit.code-quality.all"]
       user-invocable: true
 
-    - name: "dk.code-quality.specfact-sync"
+    - name: "speckit.code-quality.specfact-sync"
       file: "commands/specfact-sync.md"
       description: "Export quality findings to specfact-compatible JSON and optionally run specfact govern check for CI/CD enforcement"
-      aliases: ["dk.code-quality.sf"]
+      aliases: ["speckit.code-quality.sf"]
       user-invocable: true
 
   config:
@@ -58,7 +58,7 @@ provides:
 
 hooks:
   after_implement:
-    command: "dk.code-quality.pipeline"
+    command: "speckit.code-quality.pipeline"
     optional: true
     prompt: "Run the full code quality pipeline (review → fix → validate → future ideas)?"
     description: "Comprehensive post-implementation quality check: reviews code, fixes issues, validates requirements, and generates improvement ideas"
@@ -146,10 +146,10 @@ config_schema:
               description: "observe: report only | warn: log warnings | enforce: fail CI"
             sync_after_validate:
               type: "boolean"
-              description: "Auto-run dk.code-quality.specfact-sync after dk.code-quality.validate"
+              description: "Auto-run speckit.code-quality.specfact-sync after speckit.code-quality.validate"
             sync_after_pipeline:
               type: "boolean"
-              description: "Auto-run dk.code-quality.specfact-sync at the end of dk.code-quality.pipeline"
+              description: "Auto-run speckit.code-quality.specfact-sync at the end of speckit.code-quality.pipeline"
             export_path:
               type: "string"
               description: "Output directory for specfact-compatible quality export files"

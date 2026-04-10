@@ -6,7 +6,7 @@ description: "Parse spec.md and generate dod.yml with machine-readable, testable
 
 Parse the feature's `spec.md`, extract every Functional Requirement (FR) and Non-Functional Requirement (NFR), and produce `dod.yml` — a machine-readable, schema-validated file that defines testable pass/fail criteria for each requirement.
 
-The generated `dod.yml` is the contract between the spec and the implementation. It is updated `dk.dod.validate` and exported to specfact by `dk.dod.export`.
+The generated `dod.yml` is the contract between the spec and the implementation. It is updated `speckit.dod.validate` and exported to specfact by `speckit.dod.export`.
 
 ## User Input
 
@@ -187,7 +187,7 @@ BUILD gates section:
 
 ready_for_sprint:
   description: "All requirements are well-defined and independently testable before implementation starts"
-  status: "pending"  (dk.dod.validate will evaluate and update this)
+  status: "pending"  (speckit.dod.validate will evaluate and update this)
   checks:
     - "Each FR has at least one criterion with a non-empty description, given, when, and then"
     - "Each NFR criterion has a measurement method and either a threshold value or an audit plan"
@@ -251,13 +251,13 @@ REQUIREMENTS EXTRACTED
   Non-Functional (NFR):  <n> requirements, <total_criteria> criteria
 
 GATE STATUS
-  ready_for_sprint:    pending  (run dk.dod.validate to evaluate)
+  ready_for_sprint:    pending  (run speckit.dod.validate to evaluate)
   definition_of_done:  pending
 
 NEXT STEPS
   1. Review dod.yml — edit criteria descriptions to sharpen testability
-  2. Run dk.dod.validate after implementation to update statuses
-  3. Run dk.dod.export to produce specfact-compatible JSON
+  2. Run speckit.dod.validate after implementation to update statuses
+  3. Run speckit.dod.export to produce specfact-compatible JSON
 ```
 
 If any FR or NFR was skipped (no parseable data), list them and explain what was missing.

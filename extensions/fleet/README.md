@@ -15,16 +15,16 @@ Inspired by good ideas from the community: circuit breaker (Ralph), progress.md 
 | 5 | Checklist | `--skip-checklist` | `speckit.checklist` | `checklists/` |
 | 6 | Tasks | — | `speckit.tasks` | `tasks.md` |
 | 7 | Analyze | — | `speckit.analyze` | `.analyze-done` marker |
-| 8 | Review | `--skip-review` | `dk.fleet.review` | `review.md` (cross-model) |
+| 8 | Review | `--skip-review` | `speckit.fleet.review` | `review.md` (cross-model) |
 | 9 | Stitch Prototype | `--skip-stitch` (auto-skip if no UI) | `speckit.stitch-implement.prototype` | `.stitch-prototype-done` |
 | 10 | Implement | — | `speckit.implement` | all `[x]` in tasks.md |
 | 11 | Stitch Validate | `--skip-stitch` (auto-skip if no UI) | `speckit.stitch-implement.validate` | `.stitch-validate-done` |
-| 12 | Code Review | `--skip-code-review` | `dk.code-quality.pipeline` | `reviews/quality-summary.md` + `.code-review-done` |
+| 12 | Code Review | `--skip-code-review` | `speckit.code-quality.pipeline` | `reviews/quality-summary.md` + `.code-review-done` |
 | 13 | Release Readiness | `--skip-release` | fleet orchestrator | `release-readiness.md` |
 | 14 | Tests | — | terminal | CI passes |
 
 **Key behaviors:**
-- Resumes from the correct phase automatically — run `dk.fleet.run` on any branch, at any point
+- Resumes from the correct phase automatically — run `speckit.fleet.run` on any branch, at any point
 - **Autonomous by default** — uses `vscode_askQuestions` only for critical blockers (FAIL/CRITICAL findings, circuit breaker, missing extensions) and final ship approval (Phase 13)
 - **WIP auto-commits** after every artifact-producing phase (`wip(fleet): phase {N} {name}`), controlled by `git.auto_commit` config
 - **Auto-stashes** uncommitted changes before the run (`git stash push -m "fleet-auto-stash: ..."`) and reminds at completion, controlled by `git.auto_stash` config
@@ -36,7 +36,7 @@ Inspired by good ideas from the community: circuit breaker (Ralph), progress.md 
 - **`.fleet-status.yml` tracker**: machine-readable phase state, powers the sync command
 - Context budget management with compact summaries between phases
 - Phase 8 uses a *different model* than the rest of the workflow to catch blind spots
-- Phase 12 Code Review runs the full `dk.code-quality.pipeline` and writes canonical reports to `reviews/`
+- Phase 12 Code Review runs the full `speckit.code-quality.pipeline` and writes canonical reports to `reviews/`
 - Phase 13 Release Readiness generates a READY / CONDITIONAL / NOT READY checklist
 - Phases 4, 9, and 11 auto-skip when the feature has no UI (keyword detection in spec.md/plan.md)
 
@@ -51,24 +51,24 @@ specify extension add fleet --from https://github.com/danieldekay/spec-kit-exten
 After installing the extension, run this once to copy the agent files to `.github/agents/`:
 
 ```
-/dk.fleet.agents-install
+/speckit.fleet.agents-install
 ```
 
 Or copy manually:
 ```bash
 mkdir -p .github/agents
-cp .specify/extensions/fleet/agents/dk.fleet.*.agent.md .github/agents/
+cp .specify/extensions/fleet/agents/speckit.fleet.*.agent.md .github/agents/
 ```
 
 ## Commands
 
 | Command | Alias | Description |
 |---------|-------|-------------|
-| `dk.fleet.run` | `dk.fleet` | Start or resume the full fleet workflow |
-| `dk.fleet.review` | — | Cross-model review of design artifacts (invoked by fleet automatically) |
-| `dk.fleet.agents-install` | — | Install VS Code Copilot agent files to `.github/agents/` |
-| `dk.fleet.sync` | — | Cross-cutting artifact drift detector (7 consistency layers) |
-| `dk.fleet.change-request` | — | Formal scope change with CR-NNN tracking and artifact markers |
+| `speckit.fleet.run` | `speckit.fleet.go` | Start or resume the full fleet workflow |
+| `speckit.fleet.review` | — | Cross-model review of design artifacts (invoked by fleet automatically) |
+| `speckit.fleet.agents-install` | — | Install VS Code Copilot agent files to `.github/agents/` |
+| `speckit.fleet.sync` | — | Cross-cutting artifact drift detector (7 consistency layers) |
+| `speckit.fleet.change-request` | — | Formal scope change with CR-NNN tracking and artifact markers |
 
 ## Configuration
 

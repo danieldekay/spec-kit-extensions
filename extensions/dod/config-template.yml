@@ -47,7 +47,7 @@ dod:
     # e.g. "sk-" → specfact feature tag "sk-my-feature"
     feature_tag_prefix: "sk-"
 
-    # Automatically run dk.dod.export after each dk.dod.validate run
+    # Automatically run speckit.dod.export after each speckit.dod.validate run
     export_on_validate: false
 
     # Directory where dod-export.json files are written (for specfact)

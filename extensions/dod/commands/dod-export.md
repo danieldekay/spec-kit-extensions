@@ -48,7 +48,7 @@ fi
 mkdir -p "$(dirname "$export_file")"
 ```
 
-Abort if `dod.yml` does not exist. Instruct the user to run `dk.dod.generate` first.
+Abort if `dod.yml` does not exist. Instruct the user to run `speckit.dod.generate` first.
 
 ### Step 2: Build the Export Payload
 
@@ -179,7 +179,7 @@ SPECFACT INTEGRATION
        enforcement_level: "enforce"
 
    Or pass at export time:
-     /dk.dod.export --enforcement enforce
+     /speckit.dod.export --enforcement enforce
 ```
 
 If `specfact.project_id` is null in config, add a note:

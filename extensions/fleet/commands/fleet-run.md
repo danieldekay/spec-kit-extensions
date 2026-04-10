@@ -17,7 +17,7 @@ agents:
   - speckit.checklist
   - speckit.tasks
   - speckit.analyze
-  - dk.fleet.review
+  - speckit.fleet.review
   - speckit.stitch-implement.prototype
   - speckit.implement
   - speckit.stitch-implement.validate
@@ -53,11 +53,11 @@ You are the **SpecKit Fleet Orchestrator** -- an autonomous workflow conductor t
 | 5. Checklist | `--skip-checklist` | `speckit.checklist` | `checklists/` directory exists and contains at least one file | Auto-continue |
 | 6. Tasks | — | `speckit.tasks` | `tasks.md` exists in FEATURE_DIR | Checkpoint commit approval only |
 | 7. Analyze | — | `speckit.analyze` | `.analyze-done` marker exists in FEATURE_DIR | Auto-continue |
-| 8. Review | `--skip-review` | `dk.fleet.review` | `review.md` exists in FEATURE_DIR | Ask only for FAIL findings, override, or skip |
+| 8. Review | `--skip-review` | `speckit.fleet.review` | `review.md` exists in FEATURE_DIR | Ask only for FAIL findings, override, or skip |
 | 9. Stitch Prototype | `--skip-stitch` | `speckit.stitch-implement.prototype` | `.stitch-prototype-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; auto-continue otherwise |
 | 10. Implement | — | `speckit.implement` | ALL task checkboxes in tasks.md are `[x]` (none `[ ]`) | Ask only on blockers or circuit breaker |
 | 11. Stitch Validate | `--skip-stitch` | `speckit.stitch-implement.validate` | `.stitch-validate-done` marker exists in FEATURE_DIR | Auto-skip if feature has no UI; ask only for validation failures |
-| 12. Code Review | `--skip-code-review` | `dk.code-quality.pipeline` | `.code-review-done` marker exists in FEATURE_DIR | Ask only if unresolved critical findings remain |
+| 12. Code Review | `--skip-code-review` | `speckit.code-quality.pipeline` | `.code-review-done` marker exists in FEATURE_DIR | Ask only if unresolved critical findings remain |
 | 13. Release Readiness | `--skip-release` | Fleet orchestrator | `release-readiness.md` exists in FEATURE_DIR | Final ship/readiness approval |
 | 14. Tests | — | Terminal | Tests pass | Ask only if CI remediation choice is needed |
 
@@ -70,7 +70,7 @@ You are the **SpecKit Fleet Orchestrator** -- an autonomous workflow conductor t
    **CRITICAL: When a hard gate requires human input, ALWAYS use the `vscode_askQuestions` tool with structured options. Never present choices as markdown bullet lists, numbered menus, or plain-text prompts.**
 2. **Clarify is repeatable.** If `speckit.clarify` finds unresolved questions, use `vscode_askQuestions` to get answers, otherwise auto-advance.
 3. **Companion extensions.** UX Research (Phase 4), Stitch (Phases 9 & 11), and Code Quality (Phase 12) are formal phases that auto-skip gracefully when their extension is missing or the feature has no UI.
-   - **Before resuming:** Audit whether `speckit.ux-research.analyze`, `speckit.stitch-implement.prototype`, `speckit.stitch-implement.validate`, and `dk.code-quality.pipeline` are available. If a companion command is missing, use `vscode_askQuestions` to offer install, skip the affected phase, or continue in degraded mode.
+   - **Before resuming:** Audit whether `speckit.ux-research.analyze`, `speckit.stitch-implement.prototype`, `speckit.stitch-implement.validate`, and `speckit.code-quality.pipeline` are available. If a companion command is missing, use `vscode_askQuestions` to offer install, skip the affected phase, or continue in degraded mode.
    - **UI detection:** Scan `spec.md` and `plan.md` for UI-related keywords (component, page, screen, layout, form, modal, button, dialog, UI, UX, frontend, view, template, style, CSS, HTML, design). If none are found, auto-skip Phases 4, 9, and 11 without prompting.
 4. **Track progress.** Use the todo tool to create and update a checklist of all 14 phases so the user always sees where they are.
 5. **Pass context forward -- compactly.** When delegating, include only a **structured context summary** -- not the full output of previous phases. The summary should contain:
@@ -118,7 +118,7 @@ You are the **SpecKit Fleet Orchestrator** -- an autonomous workflow conductor t
     Artifacts: {comma-separated list of files created/updated}
     Agent: {agent name or "fleet orchestrator"}
     ```
-14. **`.fleet-status.yml` machine-readable tracker.** After each completed phase or explicit skip/override decision, update `{FEATURE_DIR}/.fleet-status.yml` (create if missing). This file enables `dk.fleet.sync` to detect artifact drift and allows instant status reporting without re-probing every file.
+14. **`.fleet-status.yml` machine-readable tracker.** After each completed phase or explicit skip/override decision, update `{FEATURE_DIR}/.fleet-status.yml` (create if missing). This file enables `speckit.fleet.sync` to detect artifact drift and allows instant status reporting without re-probing every file.
     ```yaml
     feature: "{branch name}"
     last_updated: "{ISO timestamp}"
@@ -326,7 +326,7 @@ If `speckit.ux-research.analyze` is not installed, use `vscode_askQuestions` to 
 
 ## Phase 8: Cross-Model Review
 
-1. Delegate to `dk.fleet.review` -- runs on the review model (different from primary)
+1. Delegate to `speckit.fleet.review` -- runs on the review model (different from primary)
 2. Review agent reads spec.md, plan.md, tasks.md, checklists/, remediation.md
 3. Evaluates 7 dimensions with PASS/WARN/FAIL verdicts
 4. Save review output to `{FEATURE_DIR}/review.md`
@@ -374,7 +374,7 @@ Skip this phase by passing `--skip-code-review` or setting `phases.skip_code_rev
 
 ### Purpose
 
-Run `dk.code-quality.pipeline` as the canonical post-implementation quality gate before release readiness.
+Run `speckit.code-quality.pipeline` as the canonical post-implementation quality gate before release readiness.
 
 ### Canonical Artifacts
 
@@ -388,7 +388,7 @@ Phase 12 writes all review artifacts to `{FEATURE_DIR}/reviews/`:
 
 ### Execution
 
-1. Delegate to `dk.code-quality.pipeline`
+1. Delegate to `speckit.code-quality.pipeline`
 2. Treat `{FEATURE_DIR}/reviews/quality-summary.md` as the primary Phase 12 summary
 3. Treat `{FEATURE_DIR}/reviews/code-review.md` as the detailed findings report for sync, release-readiness, and change-request workflows
 4. If the pipeline leaves unresolved CRITICAL findings after auto-fix, trigger a hard gate with `vscode_askQuestions`
@@ -556,5 +556,5 @@ After the summary:
 2. If auto-stash was used earlier, remind: *"Auto-stashed changes exist — run `git stash pop` to restore."*
 3. Use `vscode_askQuestions` to offer next steps:
    - **Push & PR** — push to remote and create a pull request
-   - **Run sync** — run `dk.fleet.sync` to check for drift before merging
+   - **Run sync** — run `speckit.fleet.sync` to check for drift before merging
    - **Done** — end the workflow

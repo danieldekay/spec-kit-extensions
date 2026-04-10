@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "dod"
   name: "Definition of Done"
-  version: "0.1.0"
+  version: "0.1.1"
   description: "Generates machine-readable, testable Definitions of Done for FR and NFR. Produces dod.yml that can be validated in CI and exported to specfact.com tooling."
   author: "danieldekay"
   repository: "https://github.com/danieldekay/spec-kit-extensions"
@@ -17,28 +17,28 @@ requires:
 
 provides:
   commands:
-    - name: "dk.dod.generate"
+    - name: "speckit.dod.generate"
       file: "commands/dod-generate.md"
       description: "Parse spec.md and generate dod.yml with machine-readable, testable DoD criteria for each FR and NFR"
-      aliases: ["dk.dod.gen"]
+      aliases: ["speckit.dod.gen"]
       user-invocable: true
 
-    - name: "dk.dod.validate"
+    - name: "speckit.dod.validate"
       file: "commands/dod-validate.md"
       description: "Validate the current implementation against dod.yml, update criterion statuses, and write a validation report"
-      aliases: ["dk.dod.check"]
+      aliases: ["speckit.dod.check"]
       user-invocable: true
 
-    - name: "dk.dod.export"
+    - name: "speckit.dod.export"
       file: "commands/dod-export.md"
       description: "Export dod.yml to specfact-compatible JSON for CI/CD enforcement and specfact governance checks"
-      aliases: ["dk.dod.sf"]
+      aliases: ["speckit.dod.sf"]
       user-invocable: true
 
-    - name: "dk.dod.report"
+    - name: "speckit.dod.report"
       file: "commands/dod-report.md"
       description: "Generate a human-readable DoD status report summarising coverage, gate status, and open items"
-      aliases: ["dk.dod.rpt"]
+      aliases: ["speckit.dod.rpt"]
       user-invocable: true
 
   config:
@@ -49,14 +49,14 @@ provides:
 
 hooks:
   after_specify:
-    command: "dk.dod.generate"
+    command: "speckit.dod.generate"
     optional: true
     prompt: "Generate machine-readable Definition of Done from spec.md?"
     description: "Parses FR/NFR tables in spec.md and writes dod.yml with testable criteria and measurement thresholds"
     condition: null
 
   after_implement:
-    command: "dk.dod.validate"
+    command: "speckit.dod.validate"
     optional: true
     prompt: "Validate implementation against Definition of Done?"
     description: "Checks test coverage for each FR criterion and measures NFR thresholds; updates dod.yml statuses"

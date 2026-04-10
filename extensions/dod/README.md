@@ -7,9 +7,9 @@ Machine-readable, testable Definitions of Done for every FR and NFR in a spec-ki
 | Problem | How this extension solves it |
 |---------|------------------------------|
 | "Done" is ambiguous and inconsistent across features | Generates a concrete, versioned `dod.yml` from spec.md FR/NFR tables |
-| Acceptance criteria live only in the spec — no link to tests | Each FR criterion maps to test files and test IDs via `dk.dod.validate` |
+| Acceptance criteria live only in the spec — no link to tests | Each FR criterion maps to test files and test IDs via `speckit.dod.validate` |
 | NFR thresholds are prose — can't be checked in CI | NFR criteria carry typed operators, values, units, and measurement commands |
-| specfact doesn't know about spec-kit requirements | `dk.dod.export` produces `specfact-export-v1` JSON that specfact can enforce |
+| specfact doesn't know about spec-kit requirements | `speckit.dod.export` produces `specfact-export-v1` JSON that specfact can enforce |
 
 ## Installation
 
@@ -21,10 +21,10 @@ specify extension add dod --source ./extensions/dod
 
 | Command | Alias | Hook | Description |
 |---------|-------|------|-------------|
-| `dk.dod.generate` | `dk.dod.gen` | `after_specify` | Parse spec.md → write `dod.yml` |
-| `dk.dod.validate` | `dk.dod.check` | `after_implement` | Check implementation → update statuses |
-| `dk.dod.export` | `dk.dod.sf` | — | Export `dod-export.json` for specfact |
-| `dk.dod.report` | `dk.dod.rpt` | — | Human-readable DoD status report |
+| `speckit.dod.generate` | `speckit.dod.gen` | `after_specify` | Parse spec.md → write `dod.yml` |
+| `speckit.dod.validate` | `speckit.dod.check` | `after_implement` | Check implementation → update statuses |
+| `speckit.dod.export` | `speckit.dod.sf` | — | Export `dod-export.json` for specfact |
+| `speckit.dod.report` | `speckit.dod.rpt` | — | Human-readable DoD status report |
 
 ## Workflow
 
@@ -35,11 +35,11 @@ speckit.specify → dod.yml generated (after_specify hook)
   Implementation
        │
        ▼
-dk.dod.validate → statuses updated in dod.yml + dod-validation-report.md
+speckit.dod.validate → statuses updated in dod.yml + dod-validation-report.md
        │
-       ├─ dk.dod.report  → human-readable status to console / markdown
+       ├─ speckit.dod.report  → human-readable status to console / markdown
        │
-       └─ dk.dod.export  → dod-export.json  (specfact-compatible)
+       └─ speckit.dod.export  → dod-export.json  (specfact-compatible)
                                 │
                                 ▼
                     specfact govern check  (CI gate)
@@ -149,7 +149,7 @@ The extension exports a `dod-export.json` in the `speckit-dod-export-v1` schema 
 uvx specfact-cli@latest --help
 
 # 2. Export DoD from spec-kit
-/dk.dod.export --enforcement observe
+/speckit.dod.export --enforcement observe
 
 # 3. Check DoD status
 uvx specfact-cli@latest govern check \
@@ -217,9 +217,9 @@ All files are written to the active feature directory (`.specify/features/<featu
 
 | File | Created by | Description |
 |------|-----------|-------------|
-| `dod.yml` | `dk.dod.generate` | Machine-readable DoD contract |
-| `dod-validation-report.md` | `dk.dod.validate` | Human-readable validation result |
-| `.specfact/dod-exports/<id>-dod-export.json` | `dk.dod.export` | specfact-compatible export |
+| `dod.yml` | `speckit.dod.generate` | Machine-readable DoD contract |
+| `dod-validation-report.md` | `speckit.dod.validate` | Human-readable validation result |
+| `.specfact/dod-exports/<id>-dod-export.json` | `speckit.dod.export` | specfact-compatible export |
 
 ## Schema Reference
 
